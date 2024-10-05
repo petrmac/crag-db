@@ -65,6 +65,8 @@ dependencies {
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+
+    testImplementation("org.neo4j.test:neo4j-harness")
     testImplementation("org.testcontainers:spock")
     testImplementation("org.spockframework:spock-core")
     testImplementation("org.spockframework:spock-spring")
