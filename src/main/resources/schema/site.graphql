@@ -1,0 +1,9 @@
+type Site {
+    id: ID!
+    name: String!
+}
+
+input CreateSiteInput {
+    id: ID!
+    name: String!
+}

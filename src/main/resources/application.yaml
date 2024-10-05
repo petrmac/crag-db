@@ -1,0 +1,23 @@
+server:
+  port: ${SERVER_PORT:3000}
+  max-http-request-header-size: 5MB
+
+spring:
+  application:
+    name: crag-db
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: verysecret
+axon:
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
+
+    eventhandling:
+      processors:
+        crag-processor:
+          mode: tracking
+          source: crag-source

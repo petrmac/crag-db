@@ -1,0 +1,8 @@
+type Query {
+    sites: [Site]
+    site(id: ID!): Site
+}
+
+type Mutation {
+    createSite(createSiteInput: CreateSiteInput!): ID!
+}
