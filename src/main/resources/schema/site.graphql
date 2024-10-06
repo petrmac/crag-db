@@ -4,6 +4,5 @@ type Site {
 }
 
 input CreateSiteInput {
-    id: ID!
     name: String!
 }

@@ -1,4 +1,4 @@
-package com.petrmacek.cragdb.site.api;
+package com.petrmacek.cragdb.crags.api.command;
 
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 

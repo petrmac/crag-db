@@ -1,4 +1,4 @@
-package com.petrmacek.cragdb.site.graphql;
+package com.petrmacek.cragdb.crags.graphql;
 
 import com.petrmacek.cragdb.generated.types.Site;
 import org.mapstruct.Mapper;
@@ -13,6 +13,6 @@ import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 public interface DtoMapper {
 
     @Mapping(target = "id", source = "siteId")
-    Site mapSite(com.petrmacek.cragdb.site.Site site);
+    Site mapSite(com.petrmacek.cragdb.crags.Site site);
 
 }

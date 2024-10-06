@@ -1,4 +1,4 @@
-package com.petrmacek.cragdb.site.api;
+package com.petrmacek.cragdb.crags.api.query;
 
 
 import java.util.UUID;

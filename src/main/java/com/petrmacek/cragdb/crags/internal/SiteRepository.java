@@ -1,4 +1,4 @@
-package com.petrmacek.cragdb.site.internal;
+package com.petrmacek.cragdb.crags.internal;
 
 
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
