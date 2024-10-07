@@ -1,12 +1,16 @@
 package com.petrmacek.cragdb.crags;
 
+import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.axonframework.commandhandling.CommandHandler;
+import org.axonframework.common.Assert;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
+import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.util.UUID;
@@ -31,6 +35,14 @@ public class RouteAggregate {
         this.id = id;
         this.name = name;
         apply(new RouteCreatedEvent(id, name));
+    }
+
+    @CommandHandler
+    public RouteAggregate(CreateRouteCommand cmd) {
+        Assert.notNull(cmd.id(), () -> "ID should not be null");
+        Assert.notNull(cmd.name(), () -> "Name should not be null");
+
+        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.id(), cmd.name()));
     }
 
     @EventSourcingHandler
