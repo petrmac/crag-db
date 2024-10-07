@@ -47,10 +47,8 @@ dependencies {
 
     implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:${property("axonVersion")}")
 
-
     // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-
 
 
     compileOnly("org.projectlombok:lombok")
@@ -79,6 +77,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     testImplementation("com.google.protobuf:protobuf-java:3.23.4")
+    testImplementation("ch.qos.logback:logback-classic:1.3.11")
+    testImplementation("org.slf4j:slf4j-api:2.0.16")
 
 }
 

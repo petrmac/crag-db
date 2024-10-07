@@ -25,6 +25,7 @@ public class SiteRepositoryProjector {
 
     @EventHandler
     public void on(SiteCreatedEvent event, @Timestamp Instant timestamp) {
+        //TODO: solve issue with materialization if record already exists
         log.info("Creating site: '{}', name: '{}'", event.siteId(), event.name());
         SiteEntity site = SiteEntity.builder()
                 .id(event.siteId())

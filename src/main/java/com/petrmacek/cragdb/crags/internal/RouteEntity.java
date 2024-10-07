@@ -3,6 +3,7 @@ package com.petrmacek.cragdb.crags.internal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
@@ -17,4 +18,7 @@ public class RouteEntity {
     private final UUID id;
     private String name;
     private long lastUpdateEpoch;
+
+    @Version
+    private Long version;
 }

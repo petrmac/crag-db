@@ -15,6 +15,8 @@ import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,9 @@ import static org.axonframework.modelling.command.AggregateLifecycle.createNew;
 @Builder
 @Slf4j
 public class SiteAggregate {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @AggregateIdentifier
     private UUID siteId;
@@ -62,7 +67,9 @@ public class SiteAggregate {
             createNew(
                     RouteAggregate.class,
                     () -> {
-                        final var route = new RouteAggregate(UUID.randomUUID(), cmd.routeName());
+                        final var route = applicationContext.getBean(RouteAggregate.class);
+                        route.setId(UUID.randomUUID());
+                        route.setName(cmd.routeName());
                         routes.add(route);
                         return route;
                     }
