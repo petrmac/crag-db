@@ -2,3 +2,8 @@ type Route {
     id: ID!
     name: String!
 }
+
+input CreateRouteInput {
+    siteId: ID!
+    name: String!
+}

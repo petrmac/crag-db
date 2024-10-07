@@ -16,8 +16,8 @@ axon:
     events: jackson
     messages: jackson
 
-    eventhandling:
-      processors:
-        crag-processor:
-          mode: tracking
-          source: crag-source
+#  eventhandling:
+#    processors:
+#      crag-processor:
+#        mode: tracking
+#        source: crag-source

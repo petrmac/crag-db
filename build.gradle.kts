@@ -66,7 +66,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 
-    testImplementation("org.neo4j.test:neo4j-harness")
+    // https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness
+    testImplementation("org.neo4j.test:neo4j-harness:5.24.1")
     testImplementation("org.testcontainers:spock")
     testImplementation("org.spockframework:spock-core")
     testImplementation("org.spockframework:spock-spring")
@@ -75,6 +76,10 @@ dependencies {
     testImplementation("com.squareup.okhttp3:mockwebserver")
     testImplementation("com.squareup.okhttp3:okhttp")
     testImplementation("org.axonframework:axon-test:${property("axonVersion")}")
+
+    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+    testRuntimeOnly("com.google.protobuf:protobuf-java:4.28.2")
+
 }
 
 dependencyManagement {

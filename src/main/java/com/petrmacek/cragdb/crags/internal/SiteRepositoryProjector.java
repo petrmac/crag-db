@@ -1,6 +1,6 @@
 package com.petrmacek.cragdb.crags.internal;
 
-import com.petrmacek.cragdb.crags.Site;
+import com.petrmacek.cragdb.crags.SiteAggregate;
 import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
@@ -15,7 +15,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -58,18 +57,18 @@ public class SiteRepositoryProjector {
     }
 
     @QueryHandler
-    public Mono<Site> handle(GetSiteQuery query) {
+    public Mono<SiteAggregate> handle(GetSiteQuery query) {
         return siteRepository.findById(query.siteId())
-                .map(siteEntity -> Site.builder()
+                .map(siteEntity -> SiteAggregate.builder()
                         .siteId(siteEntity.getId())
                         .name(siteEntity.getName())
                         .build());
     }
 
     @QueryHandler
-    public Flux<Site> handle(GetSitesQuery query) {
+    public Flux<SiteAggregate> handle(GetSitesQuery query) {
         return siteRepository.findAll()
-                .map(siteEntity -> Site.builder()
+                .map(siteEntity -> SiteAggregate.builder()
                         .siteId(siteEntity.getId())
                         .name(siteEntity.getName())
                         .build());

@@ -13,42 +13,39 @@ import org.axonframework.common.Assert;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
+import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Aggregate
+import static org.axonframework.modelling.command.AggregateLifecycle.createNew;
+
+@Aggregate(repository = "siteAggregateRepository")
 @Data
 @AllArgsConstructor
 @Builder
 @Slf4j
-public class Site {
+public class SiteAggregate {
 
     @AggregateIdentifier
     private UUID siteId;
     private String name;
-    private List<Route> routes;
 
-    public Site() {
+    @AggregateMember
+    private List<RouteAggregate> routes;
+
+    public SiteAggregate() {
     }
 
 
     @CommandHandler
-    public Site(CreateSiteCommand cmd) {
+    public SiteAggregate(CreateSiteCommand cmd) {
         Assert.notNull(cmd.siteId(), () -> "ID should not be null");
         Assert.notNull(cmd.name(), () -> "Name should not be null");
 
         AggregateLifecycle.apply(new SiteCreatedEvent(cmd.siteId(), cmd.name()));
-    }
-
-    @CommandHandler
-    public Site(AddRouteCommand cmd) {
-        Assert.notNull(cmd.siteId(), () -> "Site ID should not be null");
-        Assert.notNull(cmd.routeName(), () -> "Route Name should not be null");
-
-        AggregateLifecycle.apply(new RouteAddedEvent(cmd.siteId(), UUID.randomUUID(), cmd.routeName()));
     }
 
     @EventSourcingHandler
@@ -58,17 +55,32 @@ public class Site {
         name = event.name();
     }
 
-    @EventSourcingHandler
-    private void on(RouteAddedEvent event) {
-        log.info("Route '{}' added to site '{}'", event.routeName(), event.siteId());
+
+    @CommandHandler
+    public void handle(AddRouteCommand cmd) {
+        try {
+            createNew(
+                    RouteAggregate.class,
+                    () -> {
+                        final var route = new RouteAggregate(UUID.randomUUID(), cmd.routeName());
+                        routes.add(route);
+                        return route;
+                    }
+            );
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot create route with name '%s'".formatted(cmd.routeName()), e);
+        }
+
+        AggregateLifecycle.apply(new RouteAddedEvent(siteId, UUID.randomUUID(), cmd.routeName()));
+    }
+
+    public void addRoute(final RouteAggregate route) {
         if (routes == null) {
             routes = new ArrayList<>();
         }
-        Route route = Route.builder()
-                .id(event.routeId())
-                .name(event.routeName())
-                .build();
         routes.add(route);
-    }
 
+        AggregateLifecycle.apply(new RouteAddedEvent(this.siteId, route.getId(), route.getName()));
+    }
 }
