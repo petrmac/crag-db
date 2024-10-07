@@ -78,7 +78,7 @@ dependencies {
     testImplementation("org.axonframework:axon-test:${property("axonVersion")}")
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-    testRuntimeOnly("com.google.protobuf:protobuf-java:4.28.2")
+    testImplementation("com.google.protobuf:protobuf-java:3.23.4")
 
 }
 
