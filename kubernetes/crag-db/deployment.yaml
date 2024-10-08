@@ -15,7 +15,7 @@ spec:
       labels:
         app: crag-db
     spec:
-#      serviceAccountName: crag-db-sa
+      serviceAccountName: crag-db-sa
       containers:
         - name: crag-db
           image: crag-db
