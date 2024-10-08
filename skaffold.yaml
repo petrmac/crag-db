@@ -1,0 +1,26 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: crag-db
+build:
+  artifacts:
+    - image: crag-db
+      docker:
+        dockerfile: Dockerfile
+#      jib:
+#        args:
+#          - "-Djib.requiredVersion=3.4.3"  # Enforce Jib version 3.4.3
+#        type: gradle
+#        project: crag-db
+manifests:
+  rawYaml:
+    - ./kubernetes/namespace-crag-db.yaml
+    - ./kubernetes/axon/*.yaml
+    - ./kubernetes/neo4j/*.yaml
+    - ./kubernetes/crag-db/*.yaml
+portForward:
+  - resourceType: service
+    resourceName: crag-db
+    port: 3000
+deploy:
+  kubectl: { }

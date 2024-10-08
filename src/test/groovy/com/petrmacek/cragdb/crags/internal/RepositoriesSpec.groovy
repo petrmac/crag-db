@@ -41,7 +41,7 @@ class RepositoriesSpec extends Specification {
     private SiteRepository siteRepository
 
     def setupSpec() {
-        newServer = newServer = Neo4jBuilders.newInProcessBuilder()
+        newServer = Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer()
                 .withFixture("""
                     CREATE (a:Site {id: 'f5838853-b6f0-4b2f-81aa-6dd8ac97d34d', name: 'Tendon Hlubina', lastUpdateEpoch: 1635734400})

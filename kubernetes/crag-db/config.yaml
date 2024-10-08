@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crag-db-config
+  namespace: crag-db
+  labels:
+    app: crag-db
+data:
+  AXON_SERVERS: "axonserver.crag-db.svc.cluster.local:8124"
+  NEO4J_URL: "bolt://neo4jdb.crag-db.svc.cluster.local:7687"
+  NEO4J_USER: "neo4j"
+  NEO4J_PASSWORD: "veryverysecret"

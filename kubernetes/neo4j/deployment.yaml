@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4jdb
+  namespace: crag-db
+  labels:
+    app: neo4jdb
+spec:
+  serviceName: neo4jdb
+  replicas: 1  # Adjust the number of replicas as necessary
+  selector:
+    matchLabels:
+      app: neo4jdb
+  template:
+    metadata:
+      labels:
+        app: neo4jdb
+    spec:
+      containers:
+        - name: neo4jdb
+          image: neo4j:5.5  # Use your desired Neo4j version
+          ports:
+            - containerPort: 7474  # HTTP
+              name: http
+            - containerPort: 7687  # Bolt
+              name: bolt
+          env:
+            - name: NEO4J_AUTH
+              value: neo4j/veryverysecret  # Set your username/password for Neo4j
+          readinessProbe:
+            httpGet:
+              path: /browser
+              port: 7474
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          volumeMounts:
+            - name: neo4j-data
+              mountPath: /data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: neo4j-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

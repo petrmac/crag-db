@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: crag-db
+  namespace: crag-db
+  labels:
+    app: crag-db
+spec:
+  ports:
+    - port: 3000
+      name: http
+      protocol: TCP
+    - port: 9000
+      name: http-management
+      protocol: TCP
+  selector:
+    app: crag-db
+  type: ClusterIP

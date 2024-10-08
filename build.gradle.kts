@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.netflix.dgs.codegen") version "6.3.0"
+    id("com.google.cloud.tools.jib") version "3.4.3"
 }
 
 group = "com.petrmacek"
@@ -37,6 +38,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-neo4j")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework:spring-aspects")
 
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
 
@@ -50,8 +52,15 @@ dependencies {
     // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
 
+    // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
+    implementation("io.micrometer:micrometer-registry-prometheus:1.13.5")
+
+    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+    implementation("com.google.protobuf:protobuf-java:3.23.4")
 
     compileOnly("org.projectlombok:lombok")
+
+
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
@@ -75,8 +84,6 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp")
     testImplementation("org.axonframework:axon-test:${property("axonVersion")}")
 
-    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-    testImplementation("com.google.protobuf:protobuf-java:3.23.4")
     testImplementation("ch.qos.logback:logback-classic:1.3.11")
     testImplementation("org.slf4j:slf4j-api:2.0.16")
 
@@ -98,4 +105,22 @@ tasks.withType<com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:21" // Use your desired base image
+    }
+    to {
+        image = "petrmac/crag-db:${project.version}" // Target image
+        auth {
+            username = System.getenv("DOCKER_REGISTRY_USER") ?: ""
+            password = System.getenv("DOCKER_REGISTRY_PASSWORD") ?: ""
+        }
+    }
+    container {
+        jvmFlags = listOf("-Xms512m", "-Xmx1024m")
+        ports = listOf("3000")  // Expose container ports
+        environment = mapOf("ENV" to "production")
+    }
 }

@@ -23,9 +23,9 @@ public class AddRouteMutation {
 
         log.info("Received request to add new route: '{}'", createRouteInput.getName());
 
+//        CreateRouteCommand createRouteCommand = new CreateRouteCommand(UUID.randomUUID(), createRouteInput.getName());
         AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), createRouteInput.getName(), null);
-        Mono<String> result = commandGateway.send(addRouteCommand);
-
-        return result.thenReturn(UUID.randomUUID());
+//        Mono<String> result = commandGateway.send(createRouteCommand);
+        return commandGateway.send(addRouteCommand);
     }
 }

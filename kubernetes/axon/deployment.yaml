@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: axonserver
+  namespace: crag-db
+  labels:
+    app: axonserver
+spec:
+  serviceName: axonserver
+  replicas: 1
+  selector:
+    matchLabels:
+      app: axonserver
+  template:
+    metadata:
+      labels:
+        app: axonserver
+    spec:
+      securityContext:
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: axonserver
+          image: axoniq/axonserver:2024.1.2-jdk-17-nonroot
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: grpc
+              containerPort: 8124
+              protocol: TCP
+            - name: gui
+              containerPort: 8024
+              protocol: TCP
+          env:
+            - name: AXONIQ_LICENSE
+              value: "/axonserver/license/axoniq.license"
+            - name: axoniq.axonserver.standalone
+              value: "true"
+          volumeMounts:
+            - name: data
+              mountPath: /axonserver/data
+            - name: events
+              mountPath: /axonserver/events
+            - name: log
+              mountPath: /axonserver/log
+#            - name: config
+#              mountPath: /axonserver/config
+#              readOnly: true
+#            - name: system-token
+#              mountPath: /axonserver/security
+#              readOnly: true
+#            - name: license
+#              mountPath: /axonserver/license
+#              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /actuator/info
+              port: 8024
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/info
+              port: 8024
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+#      volumes:
+#        - name: config
+#          configMap:
+#            name: axonserver-properties
+#        - name: system-token
+#          secret:
+#            secretName: axonserver-token
+#        - name: license
+#          secret:
+#            secretName: axonserver-license
+  volumeClaimTemplates:
+    - metadata:
+        name: events
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: log
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

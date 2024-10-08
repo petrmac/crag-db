@@ -5,6 +5,7 @@ import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
 import com.petrmacek.cragdb.crags.api.query.GetSitesQuery;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
@@ -23,6 +24,7 @@ public class SiteRepositoryProjector {
     private final SiteRepository siteRepository;
     private final RouteRepository routeRepository;
 
+    @Timed(value = "site.created")
     @EventHandler
     public void on(SiteCreatedEvent event, @Timestamp Instant timestamp) {
         //TODO: solve issue with materialization if record already exists
