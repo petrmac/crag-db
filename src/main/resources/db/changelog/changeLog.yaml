@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-site-constraints
+      author: Petr Macek
+      changes:
+        - sql:
+            dbms: neo4j
+            sql: "CREATE CONSTRAINT ON (site:Site) ASSERT site.id IS UNIQUE"
+  - changeSet:
+      id: create-route-constraints
+      author: Petr Macek
+      changes:
+        - sql:
+            dbms: neo4j
+            sql: "CREATE CONSTRAINT ON (route:Route) ASSERT route.id IS UNIQUE"
+  - changeSet:
+      id: create-relationship-constraints
+      author: Petr Macek
+      changes:
+        - sql:
+            dbms: neo4j
+            sql: "MATCH (site:Site), (route:Route) CREATE (site)-[:HAS]->(route)"

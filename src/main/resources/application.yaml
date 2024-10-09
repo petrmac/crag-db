@@ -27,6 +27,9 @@ spring:
     authentication:
       username: ${NEO4J_USER:neo4j}
       password: ${NEO4J_PASSWORD:verysecret}
+  liquibase:
+    enabled: true
+    change-log: classpath:changeLog.yaml
 axon:
   axonserver:
     servers: ${AXON_SERVERS:localhost}

@@ -5,6 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
     id("com.netflix.dgs.codegen") version "6.3.0"
     id("com.google.cloud.tools.jib") version "3.4.3"
+    id("org.liquibase.gradle") version "2.1.0"
 }
 
 group = "com.petrmacek"
@@ -57,6 +58,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     implementation("com.google.protobuf:protobuf-java:3.23.4")
+
+    implementation("org.liquibase:liquibase-core")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -123,4 +126,15 @@ jib {
         ports = listOf("3000")  // Expose container ports
         environment = mapOf("ENV" to "production")
     }
+}
+
+liquibase {
+    activities {
+        register("main") {
+            arguments = mapOf(
+                "changeLogFile" to "classpath:changeLog.yaml"
+            )
+        }
+    }
+    runList = "main"
 }

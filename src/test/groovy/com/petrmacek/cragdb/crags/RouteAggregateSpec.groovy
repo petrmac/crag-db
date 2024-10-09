@@ -2,6 +2,7 @@ package com.petrmacek.cragdb.crags
 
 import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent
+import com.petrmacek.cragdb.crags.api.model.RouteData
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.axonframework.test.aggregate.FixtureConfiguration
 import org.springframework.transaction.annotation.Propagation
@@ -21,11 +22,14 @@ class RouteAggregateSpec extends Specification {
         given:
         def routeId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def routeName = "Route 1"
+        def data = new RouteData(routeName, "6a")
+
+        when:
 
         expect:
         fixture.givenNoPriorActivity()
-                .when(new CreateRouteCommand(routeId, routeName))
-                .expectEvents(new RouteCreatedEvent(routeId, routeName))
+                .when(new CreateRouteCommand(routeId, data))
+                .expectEvents(new RouteCreatedEvent(routeId, data))
     }
 
 

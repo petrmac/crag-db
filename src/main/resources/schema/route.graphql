@@ -6,4 +6,5 @@ type Route {
 input CreateRouteInput {
     siteId: ID!
     name: String!
+    grade: String
 }

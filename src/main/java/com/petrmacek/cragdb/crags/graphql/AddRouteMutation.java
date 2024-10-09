@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
 import com.petrmacek.cragdb.crags.api.command.AddRouteCommand;
+import com.petrmacek.cragdb.crags.api.model.RouteData;
 import com.petrmacek.cragdb.generated.types.CreateRouteInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,9 @@ public class AddRouteMutation {
 
         log.info("Received request to add new route: '{}'", createRouteInput.getName());
 
-//        CreateRouteCommand createRouteCommand = new CreateRouteCommand(UUID.randomUUID(), createRouteInput.getName());
-        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), createRouteInput.getName(), null);
-//        Mono<String> result = commandGateway.send(createRouteCommand);
+        RouteData data = new RouteData(createRouteInput.getName(), createRouteInput.getGrade());
+        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), data);
+        
         return commandGateway.send(addRouteCommand);
     }
 }

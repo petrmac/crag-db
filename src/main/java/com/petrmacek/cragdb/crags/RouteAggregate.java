@@ -1,6 +1,9 @@
 package com.petrmacek.cragdb.crags;
 
 import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand;
+import com.petrmacek.cragdb.crags.api.command.MarkRouteAsAssociatedWithSiteCommand;
+import com.petrmacek.cragdb.crags.api.event.RouteAddedSuccessfullyEvent;
+import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +17,6 @@ import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.util.UUID;
-
-import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Data
 @Builder
@@ -31,24 +32,30 @@ public class RouteAggregate {
     public RouteAggregate() {
     }
 
-    public RouteAggregate(final UUID id, final String name) {
-        this.id = id;
-        this.name = name;
-        apply(new RouteCreatedEvent(id, name));
-    }
 
     @CommandHandler
     public RouteAggregate(CreateRouteCommand cmd) {
         Assert.notNull(cmd.id(), () -> "ID should not be null");
-        Assert.notNull(cmd.name(), () -> "Name should not be null");
+        Assert.notNull(cmd.routeData(), () -> "Data should not be null");
 
-        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.id(), cmd.name()));
+        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.id(), cmd.routeData()));
+    }
+
+    @CommandHandler
+    public void markRouteAsAssociateWithSite(MarkRouteAsAssociatedWithSiteCommand cmd) {
+        Assert.notNull(cmd.routeId(), () -> "Route ID should not be null");
+        AggregateLifecycle.apply(new RouteAddedSuccessfullyEvent(cmd.siteId(), cmd.routeId()));
     }
 
     @EventSourcingHandler
     private void on(RouteCreatedEvent event) {
-        log.info("Route created: '{}', name: '{}'", event.routeId(), event.name());
+        log.info("Route created: '{}', name: '{}'", event.routeId(), event.data().name());
         id = event.routeId();
-        name = event.name();
+        name = event.data().name();
+    }
+
+    @EventSourcingHandler
+    private void on(RouteAssociatedWithSiteEvent event) {
+        lastUpdateEpoch = System.currentTimeMillis();
     }
 }

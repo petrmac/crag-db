@@ -1,8 +1,10 @@
 package com.petrmacek.cragdb.crags;
 
 import com.petrmacek.cragdb.crags.api.command.AddRouteCommand;
+import com.petrmacek.cragdb.crags.api.command.AssociateRouteWithSiteCommand;
 import com.petrmacek.cragdb.crags.api.command.CreateSiteCommand;
 import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
+import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.axonframework.modelling.command.AggregateLifecycle.createNew;
+import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(repository = "siteAggregateRepository")
 @Data
@@ -39,7 +41,7 @@ public class SiteAggregate {
     private String name;
 
     @AggregateMember
-    private List<RouteAggregate> routes;
+    private List<UUID> routesIds;
 
     public SiteAggregate() {
     }
@@ -60,34 +62,45 @@ public class SiteAggregate {
         name = event.name();
     }
 
+    @EventSourcingHandler
+    private void on(RouteAssociatedWithSiteEvent event) {
+        log.info("Route associated: site: '{}', route: '{}'", event.siteId(), event.routeId());
+        siteId = event.siteId();
+        routesIds.add(event.routeId());
+    }
 
     @CommandHandler
     public void handle(AddRouteCommand cmd) {
-        try {
-            createNew(
-                    RouteAggregate.class,
-                    () -> {
-                        final var route = applicationContext.getBean(RouteAggregate.class);
-                        route.setId(UUID.randomUUID());
-                        route.setName(cmd.routeName());
-                        routes.add(route);
-                        return route;
-                    }
-            );
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot create route with name '%s'".formatted(cmd.routeName()), e);
-        }
-
-        AggregateLifecycle.apply(new RouteAddedEvent(siteId, UUID.randomUUID(), cmd.routeName()));
+        apply(new RouteAddedEvent(cmd.siteId(), cmd.routeData()));
     }
 
-    public void addRoute(final RouteAggregate route) {
-        if (routes == null) {
-            routes = new ArrayList<>();
-        }
-        routes.add(route);
+    @CommandHandler
+    public void handle(AssociateRouteWithSiteCommand cmd) {
+        Assert.notNull(cmd.siteId(), () -> "Site ID should not be null");
+        Assert.notNull(cmd.routeId(), () -> "Route ID should not be null");
 
-        AggregateLifecycle.apply(new RouteAddedEvent(this.siteId, route.getId(), route.getName()));
+        apply(new RouteAssociatedWithSiteEvent(cmd.siteId(), cmd.routeId()));
     }
+
+
+//    @CommandHandler
+//    public void handle(AddRouteCommand cmd) {
+//        try {
+//            createNew(
+//                    RouteAggregate.class,
+//                    () -> {
+//                        final var route = applicationContext.getBean(RouteAggregate.class);
+//                        route.setId(UUID.randomUUID());
+//                        route.setName(cmd.routeName());
+//                        routes.add(route);
+//                        return route;
+//                    }
+//            );
+//
+//        } catch (Exception e) {
+//            throw new IllegalArgumentException("Cannot create route with name '%s'".formatted(cmd.routeName()), e);
+//        }
+//
+//        AggregateLifecycle.apply(new RouteAddedEvent(siteId, UUID.randomUUID(), cmd.routeName()));
+//    }
 }
