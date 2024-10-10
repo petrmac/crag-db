@@ -4,6 +4,6 @@ type Query {
 }
 
 type Mutation {
-    createSite(createSiteInput: CreateSiteInput!): ID!
-    addRoute(createRouteInput: CreateRouteInput!): ID!
+    createSite(createSiteInput: CreateSiteInput!): Site!
+    addRoute(createRouteInput: CreateRouteInput!): Route!
 }

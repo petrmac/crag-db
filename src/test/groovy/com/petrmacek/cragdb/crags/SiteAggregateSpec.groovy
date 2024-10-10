@@ -1,7 +1,10 @@
 package com.petrmacek.cragdb.crags
 
+import com.petrmacek.cragdb.crags.api.command.AddRouteCommand
 import com.petrmacek.cragdb.crags.api.command.CreateSiteCommand
+import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent
+import com.petrmacek.cragdb.crags.api.model.RouteData
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.axonframework.test.aggregate.FixtureConfiguration
 import org.springframework.transaction.annotation.Propagation
@@ -27,6 +30,30 @@ class SiteAggregateSpec extends Specification {
         fixture.givenNoPriorActivity()
                 .when(new CreateSiteCommand(siteId, siteName))
                 .expectEvents(new SiteCreatedEvent(siteId, siteName))
+    }
+
+    def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
+        given:
+        def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
+        def siteName = "Tendon Hlubina"
+        def routeData1 = new RouteData("Route 1", "6a")
+
+        expect:
+        fixture.givenCommands(new CreateSiteCommand(siteId, siteName))
+                .when(new AddRouteCommand(siteId, routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, routeData1))
+    }
+
+    def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
+        given:
+        def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
+        def siteName = "Tendon Hlubina"
+        def routeData1 = new RouteData("Route 1", "6a")
+
+        expect:
+        fixture.givenCommands(new CreateSiteCommand(siteId, siteName))
+                .when(new AddRouteCommand(siteId, routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, routeData1))
     }
 
 }

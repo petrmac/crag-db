@@ -35,6 +35,8 @@ public class RouteAggregate {
 
     @CommandHandler
     public RouteAggregate(CreateRouteCommand cmd) {
+        log.info("Creating RouteAggregate... '{}'", cmd);
+
         Assert.notNull(cmd.id(), () -> "ID should not be null");
         Assert.notNull(cmd.routeData(), () -> "Data should not be null");
 

@@ -33,6 +33,13 @@ public class SiteEntity {
         routes.add(route);
     }
 
+    public boolean hasRoute(UUID routeId) {
+        if (routes == null) {
+            return false;
+        }
+        return routes.stream().anyMatch(route -> route.getId().equals(routeId));
+    }
+
     @Version
     private Long version;
 }

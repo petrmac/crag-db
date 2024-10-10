@@ -1,12 +1,14 @@
 package com.petrmacek.cragdb.crags.internal;
 
+import com.petrmacek.cragdb.crags.RouteAggregate;
 import com.petrmacek.cragdb.crags.SiteAggregate;
 import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
+import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery;
+import com.petrmacek.cragdb.crags.api.query.GetRoutesQuery;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
 import com.petrmacek.cragdb.crags.api.query.GetSitesQuery;
-import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
@@ -15,7 +17,6 @@ import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorComma
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,17 +30,15 @@ public class SiteRepositoryProjector {
     private final RouteRepository routeRepository;
     private final ReactorCommandGateway commandGateway;
 
-    @Timed(value = "site.created")
     @EventHandler
-    @Transactional
-    public Mono<Void> on(SiteCreatedEvent event, @Timestamp Instant timestamp) {
-        log.info("Creating site: '{}', name: '{}'", event.siteId(), event.name());
+    public void on(SiteCreatedEvent event, @Timestamp Instant timestamp) {
+        log.info("MATERIALIZATION: Creating site: '{}', name: '{}'", event.siteId(), event.name());
 
         // Check if the site already exists
-        return siteRepository.existsById(event.siteId())
+        siteRepository.existsById(event.siteId())
                 .flatMap(exists -> {
                     if (exists) {
-                        log.info("Site with id: '{}' already exists, skipping creation", event.siteId());
+                        log.info("MATERIALIZATION: Site with id: '{}' already exists, skipping creation", event.siteId());
                         return Mono.empty(); // Skip saving if site exists
                     }
                     // If site doesn't exist, create and save it
@@ -50,64 +49,66 @@ public class SiteRepositoryProjector {
                             .build();
                     return siteRepository.save(site).then();
                 }).doOnSuccess(v -> {
-                    log.info("Site saved successfully: '{}'", event.siteId());
-                });
+                    log.info("MATERIALIZATION: Site saved successfully: '{}'", event.siteId());
+                }).subscribe(); // Convert to Mono<Void> to signify completion
     }
 
     @EventHandler
-    @Transactional
-    public Mono<Void> on(RouteCreatedEvent event, @Timestamp Instant timestamp) {
-        log.info("Creating route: '{}', name: '{}'", event.routeId(), event.data().name());
+    public void on(RouteCreatedEvent event, @Timestamp Instant timestamp) {
+        log.info("MATERIALIZATION: Creating route: '{}', name: '{}'", event.routeId(), event.data().name());
 
-        return routeRepository.findById(event.routeId())
-                .flatMap(existingRoute -> {
-                    log.info("Route with id: '{}' already exists, skipping creation", event.routeId());
-                    return Mono.empty(); // Route already exists, so skip creation
-                })
-                .switchIfEmpty(
-                        Mono.defer(() -> {
+        routeRepository.existsById(event.routeId())
+                .flatMap(exists -> {
+                            if (exists) {
+                                log.info("MATERIALIZATION: Route with id: '{}' already exists, skipping creation", event.routeId());
+                                return Mono.empty(); // Route already exists, so skip creation
+                            }
+
                             RouteEntity route = RouteEntity.builder()
                                     .id(event.routeId())
                                     .name(event.data().name())
                                     .lastUpdateEpoch(timestamp.toEpochMilli())
                                     .build();
-                            return routeRepository.save(route)
-                                    .doOnNext(savedRoute -> log.info("Route saved: '{}'", savedRoute.getId()));
-                        })
-                )
-                .then();
+                            return routeRepository.save(route);
+                        }
+                ).doOnSuccess(v -> {
+                    log.info("MATERIALIZATION: Route saved successfully: '{}'", event.routeId());
+                })
+                .subscribe(); // Convert to Mono<Void> to signify completion
     }
 
     @EventHandler
-    @Transactional
-    public Mono<Void> on(RouteAssociatedWithSiteEvent event, @Timestamp Instant timestamp) {
-        return Mono.zip(
-                        siteRepository.findById(event.siteId()),
-                        routeRepository.findById(event.routeId())
-                )
+    public void on(RouteAssociatedWithSiteEvent event, @Timestamp Instant timestamp) {
+        log.info("MATERIALIZATION: Associating route: '{}' with site: '{}'", event.routeId(), event.siteId());
+
+        Mono.zip(siteRepository.findById(event.siteId()), routeRepository.findById(event.routeId()))
                 .flatMap(tuple -> {
                     var siteEntity = tuple.getT1();
                     var routeEntity = tuple.getT2();
 
-                    if (siteEntity == null || routeEntity == null) {
-                        return Mono.error(new IllegalArgumentException("Site or Route not found"));
+                    if (siteEntity.hasRoute(event.routeId())) {
+                        log.info("MATERIALIZATION: Route with id: '{}' already associated with site: '{}', skipping association", event.routeId(), event.siteId());
+                        return Mono.empty(); // Skip association if route is already associated
                     }
 
                     // Add the route to the site and establish a bidirectional relationship
                     siteEntity.addRoute(routeEntity);
                     siteEntity.setLastUpdateEpoch(timestamp.toEpochMilli());
-                    routeEntity.associateWithSite(siteEntity);
 
-                    // Save both entities in a single transaction
                     return siteRepository.save(siteEntity)
-                            .then(routeRepository.save(routeEntity))
+                            .doOnSuccess(v -> {
+                                log.info("MATERIALIZATION: Route updated - associated with site: site: '{}', route: '{}'", event.siteId(), event.routeId());
+                            })
                             .onErrorResume(OptimisticLockingFailureException.class, ex -> {
-                                log.warn("Optimistic locking failure: {}", ex.getMessage());
+                                log.error("MATERIALIZATION: Optimistic locking failure: {}", ex.getMessage());
                                 // Optionally retry or log here
                                 return Mono.empty(); // Or handle as necessary
                             });
                 })
-                .then(); // Convert to Mono<Void> to signify completion
+                .doOnSuccess(v -> {
+                    log.info("MATERIALIZATION: Route successfully associated with site: site: '{}', route: '{}'", event.siteId(), event.routeId());
+                })
+                .subscribe(); // Convert to Mono<Void> to signify completion
     }
 
     @QueryHandler
@@ -116,7 +117,8 @@ public class SiteRepositoryProjector {
                 .map(siteEntity -> SiteAggregate.builder()
                         .siteId(siteEntity.getId())
                         .name(siteEntity.getName())
-                        .build());
+                        .build())
+                .doOnError(e -> log.error("Error while fetching site", e));
     }
 
     @QueryHandler
@@ -125,7 +127,29 @@ public class SiteRepositoryProjector {
                 .map(siteEntity -> SiteAggregate.builder()
                         .siteId(siteEntity.getId())
                         .name(siteEntity.getName())
-                        .build());
+                        .routesIds(siteEntity.getRoutes().stream().map(RouteEntity::getId).toList())
+                        .build())
+                .doOnError(e -> log.error("Error while fetching sites", e));
+    }
+
+    @QueryHandler
+    public Flux<RouteAggregate> handle(GetRoutesQuery query) {
+        return siteRepository.findRoutesForSite(query.siteId())
+                .map(routeEntity -> RouteAggregate.builder()
+                        .id(routeEntity.getId())
+                        .name(routeEntity.getName())
+                        .build())
+                .doOnError(e -> log.error("Error while fetching routes", e));
+    }
+
+    @QueryHandler
+    public Flux<RouteAggregate> handle(FindRouteByNameQuery query) {
+        return routeRepository.findByName(query.name())
+                .map(routeEntity -> RouteAggregate.builder()
+                        .id(routeEntity.getId())
+                        .name(routeEntity.getName())
+                        .build())
+                .doOnError(e -> log.error("Error while fetching routes", e));
     }
 
 }

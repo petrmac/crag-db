@@ -19,7 +19,6 @@ import java.util.Map;
 public class RouteAggregateConfig {
 
     private final EventStore eventStore;
-//    private final RepositoryProvider repositoryProvider;
 
     @Bean
     @Scope("prototype")
@@ -39,7 +38,6 @@ public class RouteAggregateConfig {
         return EventSourcingRepository.builder(RouteAggregate.class)
                 .aggregateFactory(routeAggregateAggregateFactory())
                 .eventStore(eventStore)
-//                .repositoryProvider(repositoryProvider)
                 .build();
     }
 }

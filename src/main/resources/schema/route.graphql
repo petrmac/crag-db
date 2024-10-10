@@ -1,6 +1,7 @@
 type Route {
     id: ID!
     name: String!
+    grade: String
 }
 
 input CreateRouteInput {

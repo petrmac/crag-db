@@ -49,6 +49,8 @@ public class SiteAggregate {
 
     @CommandHandler
     public SiteAggregate(CreateSiteCommand cmd) {
+        log.info("Creating SiteAggregate... '{}'", cmd);
+
         Assert.notNull(cmd.siteId(), () -> "ID should not be null");
         Assert.notNull(cmd.name(), () -> "Name should not be null");
 
@@ -58,6 +60,7 @@ public class SiteAggregate {
     @EventSourcingHandler
     private void on(SiteCreatedEvent event) {
         log.info("Site created: '{}', name: '{}'", event.siteId(), event.name());
+
         siteId = event.siteId();
         name = event.name();
     }
@@ -65,12 +68,17 @@ public class SiteAggregate {
     @EventSourcingHandler
     private void on(RouteAssociatedWithSiteEvent event) {
         log.info("Route associated: site: '{}', route: '{}'", event.siteId(), event.routeId());
-        siteId = event.siteId();
+
+        if (routesIds == null) {
+            routesIds = new ArrayList<>();
+        }
         routesIds.add(event.routeId());
     }
 
     @CommandHandler
     public void handle(AddRouteCommand cmd) {
+        log.info("Route addition initiated: site: '{}', route: '{}'", cmd.siteId(), cmd.routeData().name());
+
         apply(new RouteAddedEvent(cmd.siteId(), cmd.routeData()));
     }
 
@@ -81,26 +89,4 @@ public class SiteAggregate {
 
         apply(new RouteAssociatedWithSiteEvent(cmd.siteId(), cmd.routeId()));
     }
-
-
-//    @CommandHandler
-//    public void handle(AddRouteCommand cmd) {
-//        try {
-//            createNew(
-//                    RouteAggregate.class,
-//                    () -> {
-//                        final var route = applicationContext.getBean(RouteAggregate.class);
-//                        route.setId(UUID.randomUUID());
-//                        route.setName(cmd.routeName());
-//                        routes.add(route);
-//                        return route;
-//                    }
-//            );
-//
-//        } catch (Exception e) {
-//            throw new IllegalArgumentException("Cannot create route with name '%s'".formatted(cmd.routeName()), e);
-//        }
-//
-//        AggregateLifecycle.apply(new RouteAddedEvent(siteId, UUID.randomUUID(), cmd.routeName()));
-//    }
 }

@@ -1,6 +1,7 @@
 type Site {
     id: ID!
     name: String!
+    routes: [Route]
 }
 
 input CreateSiteInput {

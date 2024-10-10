@@ -63,6 +63,27 @@ class RepositoriesSpec extends Specification {
         registry.add("spring.neo4j.authentication.password", () -> "null");
     }
 
+    def "should find routes by site id"() {
+        when:
+        def routes = siteRepository.findRoutesForSite(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")).collectList().block()
+
+        then:
+        routes.size() == 2
+        routes.find { it.name == "Route 1" }
+        routes.find { it.name == "Route 2" }
+
+    }
+
+    def "should find route by name"() {
+        when:
+        def routes = routeRepository.findByName("Route 1").collectList().block()
+
+        then:
+        routes.size() == 1
+        routes.find { it.name == "Route 1" }
+
+    }
+
     def "should find site by id"() {
         when:
         def site = siteRepository.findById(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")).block()
