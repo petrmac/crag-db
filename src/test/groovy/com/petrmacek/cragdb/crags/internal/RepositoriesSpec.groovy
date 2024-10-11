@@ -45,10 +45,12 @@ class RepositoriesSpec extends Specification {
                 .withDisabledServer()
                 .withFixture("""
                     CREATE (a:Site {id: 'f5838853-b6f0-4b2f-81aa-6dd8ac97d34d', name: 'Tendon Hlubina', lastUpdateEpoch: 1635734400})
-                    CREATE (b:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169d', name: 'Route 1', lastUpdateEpoch: 1635734400})
-                    CREATE (c:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169c', name: 'Route 2', lastUpdateEpoch: 1635734400})
+                    CREATE (b:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169d', name: 'Route 1', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
+                    CREATE (c:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169c', name: 'Route 2', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
                     MERGE (a)-[:HAS]->(b)
                     MERGE (a)-[:HAS]->(c)
+                    MERGE (b)-[:BELONGS_TO]->(a)
+                    MERGE (c)-[:BELONGS_TO]->(a)
                     """).build()
     }
 
@@ -65,12 +67,23 @@ class RepositoriesSpec extends Specification {
 
     def "should find routes by site id"() {
         when:
-        def routes = siteRepository.findRoutesForSite(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")).collectList().block()
+        def routes = routeRepository.findBySiteId(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")).collectList().block()
 
         then:
         routes.size() == 2
-        routes.find { it.name == "Route 1" }
-        routes.find { it.name == "Route 2" }
+        def route1 = routes.find { it.name == "Route 1" }
+        def route2 = routes.find { it.name == "Route 2" }
+
+        route1
+        route2
+
+        route1.frenchGrade == "6a"
+        route1.uiaaGrade == "VI+"
+        route1.ydsGrade == "5.10b"
+
+        route2.frenchGrade == "6a"
+        route2.uiaaGrade == "VI+"
+        route2.ydsGrade == "5.10b"
 
     }
 
@@ -93,6 +106,18 @@ class RepositoriesSpec extends Specification {
         site.routes.size() == 2
         site.routes.find { it.name == "Route 1" }
         site.routes.find { it.name == "Route 2" }
+    }
+
+    def "should find route by id"() {
+        when:
+        def route = routeRepository.findById(UUID.fromString("e51987b8-0c49-4e4d-97e3-5adc31f5169d")).block()
+
+        then:
+        route.name == "Route 1"
+        route.frenchGrade == "6a"
+        route.uiaaGrade == "VI+"
+        route.ydsGrade == "5.10b"
+        route.lastUpdateEpoch == 1635734400
     }
 
 

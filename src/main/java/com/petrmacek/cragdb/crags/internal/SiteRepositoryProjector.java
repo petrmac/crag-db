@@ -5,6 +5,8 @@ import com.petrmacek.cragdb.crags.SiteAggregate;
 import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
+import com.petrmacek.cragdb.crags.api.model.GradeSystem;
+import com.petrmacek.cragdb.crags.api.model.grade.Grade;
 import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery;
 import com.petrmacek.cragdb.crags.api.query.GetRoutesQuery;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
@@ -13,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
-import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,6 @@ import java.time.Instant;
 public class SiteRepositoryProjector {
     private final SiteRepository siteRepository;
     private final RouteRepository routeRepository;
-    private final ReactorCommandGateway commandGateway;
 
     @EventHandler
     public void on(SiteCreatedEvent event, @Timestamp Instant timestamp) {
@@ -55,7 +55,7 @@ public class SiteRepositoryProjector {
 
     @EventHandler
     public void on(RouteCreatedEvent event, @Timestamp Instant timestamp) {
-        log.info("MATERIALIZATION: Creating route: '{}', name: '{}'", event.routeId(), event.data().name());
+        log.info("MATERIALIZATION: Creating route: '{}', name: '{}'", event.routeId(), event.data().getName());
 
         routeRepository.existsById(event.routeId())
                 .flatMap(exists -> {
@@ -63,13 +63,17 @@ public class SiteRepositoryProjector {
                                 log.info("MATERIALIZATION: Route with id: '{}' already exists, skipping creation", event.routeId());
                                 return Mono.empty(); // Route already exists, so skip creation
                             }
-
-                            RouteEntity route = RouteEntity.builder()
+                            var ydsGrade = event.data().getGrade().toSystem(GradeSystem.YDS).map(Grade::getValue);
+                            var uiaaGrade = event.data().getGrade().toSystem(GradeSystem.UIAA).map(Grade::getValue);
+                            var frenchGrade = event.data().getGrade().toSystem(GradeSystem.French).map(Grade::getValue);
+                            var route = RouteEntity.builder()
                                     .id(event.routeId())
-                                    .name(event.data().name())
-                                    .lastUpdateEpoch(timestamp.toEpochMilli())
-                                    .build();
-                            return routeRepository.save(route);
+                                    .name(event.data().getName())
+                                    .lastUpdateEpoch(timestamp.toEpochMilli());
+                            ydsGrade.ifPresent(route::ydsGrade);
+                            uiaaGrade.ifPresent(route::uiaaGrade);
+                            frenchGrade.ifPresent(route::frenchGrade);
+                            return routeRepository.save(route.build());
                         }
                 ).doOnSuccess(v -> {
                     log.info("MATERIALIZATION: Route saved successfully: '{}'", event.routeId());
@@ -92,10 +96,13 @@ public class SiteRepositoryProjector {
                     }
 
                     // Add the route to the site and establish a bidirectional relationship
-                    siteEntity.addRoute(routeEntity);
-                    siteEntity.setLastUpdateEpoch(timestamp.toEpochMilli());
+//                    siteEntity.addRoute(routeEntity);
+//                    siteEntity.setLastUpdateEpoch(timestamp.toEpochMilli());
 
-                    return siteRepository.save(siteEntity)
+                    routeEntity.associateWithSite(siteEntity);
+                    routeEntity.setLastUpdateEpoch(timestamp.toEpochMilli());
+
+                    return routeRepository.save(routeEntity)
                             .doOnSuccess(v -> {
                                 log.info("MATERIALIZATION: Route updated - associated with site: site: '{}', route: '{}'", event.siteId(), event.routeId());
                             })
@@ -134,13 +141,25 @@ public class SiteRepositoryProjector {
 
     @QueryHandler
     public Flux<RouteAggregate> handle(GetRoutesQuery query) {
-        return siteRepository.findRoutesForSite(query.siteId())
+        return routeRepository.findBySiteId(query.siteId())
                 .map(routeEntity -> RouteAggregate.builder()
                         .id(routeEntity.getId())
                         .name(routeEntity.getName())
                         .build())
                 .doOnError(e -> log.error("Error while fetching routes", e));
     }
+
+//    @QueryHandler
+//    public Flux<RouteAggregate> handle(GetRoutesQuery query) {
+//        return siteRepository.findById(query.siteId())
+//                .flatMapMany(siteEntity -> Flux.fromIterable(siteEntity.getRoutes()))
+//                .map(routeEntity -> RouteAggregate.builder()
+//                        .id(routeEntity.getId())
+//                        .name(routeEntity.getName())
+//                        .grade(Grade.forString(routeEntity.getFrenchGrade(), GradeSystem.French))
+//                        .build())
+//                .doOnError(e -> log.error("Error while fetching routes", e));
+//    }
 
     @QueryHandler
     public Flux<RouteAggregate> handle(FindRouteByNameQuery query) {

@@ -1,5 +1,7 @@
 package com.petrmacek.cragdb.crags.api.model.grade;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.petrmacek.cragdb.crags.api.model.GradeSystem;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -9,7 +11,7 @@ import java.util.Optional;
  * Enum representing French climbing grade system
  */
 @Getter
-public enum France implements Grade {
+public enum French implements Grade {
     F1("1", 1, Level.Novice),
     F2("2", 2, Level.Novice),
     F3("3", 3, Level.Novice),
@@ -43,24 +45,25 @@ public enum France implements Grade {
     F9bPlus("9b+", 31, Level.Expert),
     F9c("9c", 32, Level.Expert);
 
-    private final String name;
+    private final String value;
     private final int order;
     private final Level level;
 
-    France(String name, final int order, final Level level) {
-        this.name = name;
+    French(String value, final int order, final Level level) {
+        this.value = value;
         this.order = order;
         this.level = level;
     }
 
-    public static Optional<France> forString(String name) {
-        return Arrays.stream(France.values())
-                .filter(eventState -> eventState.getName().equalsIgnoreCase(name))
+    @JsonCreator
+    public static Optional<French> forString(String name) {
+        return Arrays.stream(French.values())
+                .filter(system -> system.getValue().equalsIgnoreCase(name))
                 .findFirst();
     }
 
     @Override
-    public String toString() {
-        return name;
+    public GradeSystem getSystem() {
+        return GradeSystem.French;
     }
 }

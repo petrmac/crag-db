@@ -5,6 +5,7 @@ import com.petrmacek.cragdb.crags.api.command.MarkRouteAsAssociatedWithSiteComma
 import com.petrmacek.cragdb.crags.api.event.RouteAddedSuccessfullyEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
+import com.petrmacek.cragdb.crags.api.model.grade.Grade;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +15,11 @@ import org.axonframework.common.Assert;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
+import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -27,7 +31,10 @@ public class RouteAggregate {
     @AggregateIdentifier
     private UUID id;
     private String name;
-    private long lastUpdateEpoch;
+    private Grade grade;
+
+    @AggregateMember
+    private UUID siteId;
 
     public RouteAggregate() {
     }
@@ -51,13 +58,17 @@ public class RouteAggregate {
 
     @EventSourcingHandler
     private void on(RouteCreatedEvent event) {
-        log.info("Route created: '{}', name: '{}'", event.routeId(), event.data().name());
+        log.info("Route created: '{}', name: '{}'", event.routeId(), event.data().getName());
         id = event.routeId();
-        name = event.data().name();
+        name = event.data().getName();
+        grade = event.data().getGrade();
     }
 
     @EventSourcingHandler
     private void on(RouteAssociatedWithSiteEvent event) {
-        lastUpdateEpoch = System.currentTimeMillis();
+        log.info("Route associated: site: '{}', route: '{}'", event.siteId(), event.routeId());
+
+        siteId = event.siteId();
     }
+
 }

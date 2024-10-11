@@ -2,10 +2,22 @@ type Route {
     id: ID!
     name: String!
     grade: String
+    gradeSystem: GradeSystem
 }
 
 input CreateRouteInput {
     siteId: ID!
     name: String!
-    grade: String
+    grade: GradeInput
+}
+
+input GradeInput {
+    system: GradeSystem!
+    value: String!
+}
+
+enum GradeSystem {
+    YDS
+    UIAA
+    French
 }

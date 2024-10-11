@@ -6,6 +6,9 @@ import com.netflix.graphql.dgs.InputArgument;
 import com.petrmacek.cragdb.crags.RouteAggregate;
 import com.petrmacek.cragdb.crags.api.command.AddRouteCommand;
 import com.petrmacek.cragdb.crags.api.model.RouteData;
+import com.petrmacek.cragdb.crags.api.model.grade.French;
+import com.petrmacek.cragdb.crags.api.model.grade.UIAA;
+import com.petrmacek.cragdb.crags.api.model.grade.YDS;
 import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery;
 import com.petrmacek.cragdb.generated.types.CreateRouteInput;
 import com.petrmacek.cragdb.generated.types.Route;
@@ -30,8 +33,13 @@ public class AddRouteMutation {
 
         log.info("Received request to add new route: '{}'", createRouteInput.getName());
 
-        RouteData data = new RouteData(createRouteInput.getName(), createRouteInput.getGrade());
-        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), data);
+
+        var dataBuilder = RouteData.builder().name(createRouteInput.getName());
+        if (createRouteInput.getGrade() != null) {
+            dataBuilder.gradeSystem(dtoMapper.mapGradeSystem(createRouteInput.getGrade().getSystem()));
+            convertGrade(createRouteInput, dataBuilder);
+        }
+        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), dataBuilder.build());
 
         var mutationResult = commandGateway.send(addRouteCommand);
 
@@ -39,5 +47,16 @@ public class AddRouteMutation {
                         .single())
                 .map(dtoMapper::mapRoute)
                 .doOnError(e -> log.error("Error while fetching route", e));
+    }
+
+    private static void convertGrade(final CreateRouteInput createRouteInput, final RouteData.RouteDataBuilder data) {
+        switch (createRouteInput.getGrade().getSystem()) {
+            case French -> data.grade(French.forString(createRouteInput.getGrade().getValue())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid grade")));
+            case YDS -> data.grade(YDS.forString(createRouteInput.getGrade().getValue())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid grade")));
+            case UIAA -> data.grade(UIAA.forString(createRouteInput.getGrade().getValue())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid grade")));
+        }
     }
 }

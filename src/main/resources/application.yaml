@@ -3,7 +3,7 @@ server:
   max-http-request-header-size: 5MB
 management:
   server:
-    port: 9000
+    port: 4000
   endpoints:
     web:
       exposure:
