@@ -53,6 +53,9 @@ public class RouteAggregate {
     @CommandHandler
     public void markRouteAsAssociateWithSite(MarkRouteAsAssociatedWithSiteCommand cmd) {
         Assert.notNull(cmd.routeId(), () -> "Route ID should not be null");
+        Assert.notNull(cmd.siteId(), () -> "Site ID should not be null");
+        log.info("Marking route as associated with site: '{}'", cmd.routeId());
+
         AggregateLifecycle.apply(new RouteAddedSuccessfullyEvent(cmd.siteId(), cmd.routeId()));
     }
 

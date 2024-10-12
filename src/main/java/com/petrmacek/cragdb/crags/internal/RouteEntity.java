@@ -30,6 +30,6 @@ public class RouteEntity {
         this.site = site;
     }
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.INCOMING)
+    @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.OUTGOING)
     private SiteEntity site;
 }

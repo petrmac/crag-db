@@ -20,7 +20,9 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.time.Instant;
 
 @Service
@@ -112,6 +114,9 @@ public class SiteRepositoryProjector {
                                 return Mono.empty(); // Or handle as necessary
                             });
                 })
+                .retryWhen(Retry.backoff(10, Duration.ofMillis(100)) // Retry up to 10 times with exponential backoff
+                        .filter(ex -> ex instanceof OptimisticLockingFailureException)
+                        .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> retrySignal.failure())) // Optionally throw an exception if retries fail
                 .doOnSuccess(v -> {
                     log.info("MATERIALIZATION: Route successfully associated with site: site: '{}', route: '{}'", event.siteId(), event.routeId());
                 })
@@ -148,18 +153,6 @@ public class SiteRepositoryProjector {
                         .build())
                 .doOnError(e -> log.error("Error while fetching routes", e));
     }
-
-//    @QueryHandler
-//    public Flux<RouteAggregate> handle(GetRoutesQuery query) {
-//        return siteRepository.findById(query.siteId())
-//                .flatMapMany(siteEntity -> Flux.fromIterable(siteEntity.getRoutes()))
-//                .map(routeEntity -> RouteAggregate.builder()
-//                        .id(routeEntity.getId())
-//                        .name(routeEntity.getName())
-//                        .grade(Grade.forString(routeEntity.getFrenchGrade(), GradeSystem.French))
-//                        .build())
-//                .doOnError(e -> log.error("Error while fetching routes", e));
-//    }
 
     @QueryHandler
     public Flux<RouteAggregate> handle(FindRouteByNameQuery query) {
