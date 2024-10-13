@@ -1,5 +1,6 @@
 package com.petrmacek.cragdb.crags
 
+import com.petrmacek.cragdb.crags.api.command.AddRouteCommand
 import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent
 import com.petrmacek.cragdb.crags.api.model.GradeSystem
@@ -23,6 +24,7 @@ class RouteAggregateSpec extends Specification {
     def "should create a new route"() {
         given:
         def routeId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
+        def siteId = UUID.fromString("b5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def routeName = "Route 1"
         def data = RouteData.builder()
                 .name(routeName)
@@ -34,8 +36,8 @@ class RouteAggregateSpec extends Specification {
 
         expect:
         fixture.givenNoPriorActivity()
-                .when(new CreateRouteCommand(routeId, data))
-                .expectEvents(new RouteCreatedEvent(routeId, data))
+                .when(new CreateRouteCommand(siteId, routeId, data))
+                .expectEvents(new RouteCreatedEvent(siteId, routeId, data))
     }
 
 

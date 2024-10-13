@@ -32,8 +32,6 @@ public class AddRouteMutation {
     public Mono<Route> addRoute(@InputArgument CreateRouteInput createRouteInput) {
 
         log.info("Received request to add new route: '{}'", createRouteInput.getName());
-
-
         var dataBuilder = RouteData.builder().name(createRouteInput.getName());
         if (createRouteInput.getGrade() != null) {
             dataBuilder.gradeSystem(dtoMapper.mapGradeSystem(createRouteInput.getGrade().getSystem()));

@@ -101,9 +101,6 @@ class RepositoriesSpec extends Specification {
 
         then:
         site.name == "Tendon Hlubina"
-//        site.routes.size() == 2
-//        site.routes.find { it.name == "Route 1" }
-//        site.routes.find { it.name == "Route 2" }
     }
 
     def "should find route by id"() {
@@ -134,16 +131,17 @@ class RepositoriesSpec extends Specification {
         savedSite
 
         when: 'site is looked for...'
-        def result = siteRepository.findById(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34c")).block()
+        def foundSite = siteRepository.findById(UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34c")).block()
 
         then:
-        result
+        foundSite
 
         when: 'route is added to site...'
         def route = RouteEntity.builder()
                 .id(UUID.fromString("e51987b8-0c49-4e4d-97e3-5adc31f5169e"))
                 .name("Route 3")
                 .lastUpdateEpoch(1635734400)
+                .site(foundSite)
                 .build()
         def savedRoute = routeRepository.save(route).block()
 
@@ -151,19 +149,10 @@ class RepositoriesSpec extends Specification {
         savedRoute
 
         when: 'route is added to site...'
-        savedSite.addRoute(savedRoute)
-        def updatedSite = siteRepository.save(savedSite).block()
+        def foundRouteBySite = routeRepository.findBySiteId(foundSite.id).collectList().block().first()
 
         then:
-        updatedSite.routes.size() == 1
-
-        when: 'site is looked for...'
-        def foundSite = siteRepository.findById(savedSite.id).block()
-
-        then: 'site is found with the route'
-        foundSite
-        foundSite.name == savedSite.name
-        foundSite.routes.size() == 1
+        foundRouteBySite
 
     }
 }

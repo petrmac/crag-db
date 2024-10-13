@@ -5,5 +5,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.UUID;
 
-public record CreateRouteCommand(@TargetAggregateIdentifier UUID id, RouteData routeData) {
+public record CreateRouteCommand(UUID siteId, @TargetAggregateIdentifier UUID routeId, RouteData routeData) {
 }

@@ -7,5 +7,5 @@ import org.axonframework.serialization.Revision;
 import java.util.UUID;
 
 @Revision("1.0")
-public record RouteCreatedEvent(@TargetAggregateIdentifier UUID routeId, RouteData data) {
+public record RouteCreatedEvent(UUID siteId, @TargetAggregateIdentifier UUID routeId, RouteData data) {
 }

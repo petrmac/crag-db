@@ -1,9 +1,6 @@
 package com.petrmacek.cragdb.crags;
 
 import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand;
-import com.petrmacek.cragdb.crags.api.command.MarkRouteAsAssociatedWithSiteCommand;
-import com.petrmacek.cragdb.crags.api.event.RouteAddedSuccessfullyEvent;
-import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.model.grade.Grade;
 import lombok.AllArgsConstructor;
@@ -18,8 +15,6 @@ import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -44,19 +39,10 @@ public class RouteAggregate {
     public RouteAggregate(CreateRouteCommand cmd) {
         log.info("Creating RouteAggregate... '{}'", cmd);
 
-        Assert.notNull(cmd.id(), () -> "ID should not be null");
+        Assert.notNull(cmd.siteId(), () -> "ID should not be null");
         Assert.notNull(cmd.routeData(), () -> "Data should not be null");
 
-        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.id(), cmd.routeData()));
-    }
-
-    @CommandHandler
-    public void markRouteAsAssociateWithSite(MarkRouteAsAssociatedWithSiteCommand cmd) {
-        Assert.notNull(cmd.routeId(), () -> "Route ID should not be null");
-        Assert.notNull(cmd.siteId(), () -> "Site ID should not be null");
-        log.info("Marking route as associated with site: '{}'", cmd.routeId());
-
-        AggregateLifecycle.apply(new RouteAddedSuccessfullyEvent(cmd.siteId(), cmd.routeId()));
+        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.siteId(), cmd.routeId(), cmd.routeData()));
     }
 
     @EventSourcingHandler
@@ -65,12 +51,6 @@ public class RouteAggregate {
         id = event.routeId();
         name = event.data().getName();
         grade = event.data().getGrade();
-    }
-
-    @EventSourcingHandler
-    private void on(RouteAssociatedWithSiteEvent event) {
-        log.info("Route associated: site: '{}', route: '{}'", event.siteId(), event.routeId());
-
         siteId = event.siteId();
     }
 

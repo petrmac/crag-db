@@ -1,10 +1,8 @@
 package com.petrmacek.cragdb.crags;
 
 import com.petrmacek.cragdb.crags.api.command.AddRouteCommand;
-import com.petrmacek.cragdb.crags.api.command.AssociateRouteWithSiteCommand;
 import com.petrmacek.cragdb.crags.api.command.CreateSiteCommand;
 import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
-import com.petrmacek.cragdb.crags.api.event.RouteAssociatedWithSiteEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,28 +63,10 @@ public class SiteAggregate {
         name = event.name();
     }
 
-    @EventSourcingHandler
-    private void on(RouteAssociatedWithSiteEvent event) {
-        log.info("Route associated: site: '{}', route: '{}'", event.siteId(), event.routeId());
-
-        if (routesIds == null) {
-            routesIds = new ArrayList<>();
-        }
-        routesIds.add(event.routeId());
-    }
-
     @CommandHandler
     public void handle(AddRouteCommand cmd) {
         log.info("Route addition initiated: site: '{}', route: '{}'", cmd.siteId(), cmd.routeData().getName());
 
         apply(new RouteAddedEvent(cmd.siteId(), cmd.routeData()));
-    }
-
-    @CommandHandler
-    public void handle(AssociateRouteWithSiteCommand cmd) {
-        Assert.notNull(cmd.siteId(), () -> "Site ID should not be null");
-        Assert.notNull(cmd.routeId(), () -> "Route ID should not be null");
-
-        apply(new RouteAssociatedWithSiteEvent(cmd.siteId(), cmd.routeId()));
     }
 }
