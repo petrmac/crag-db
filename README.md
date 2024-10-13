@@ -1,7 +1,10 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/59f16110623a9b5801d2/maintainability)](https://codeclimate.com/github/petrmac/crag-db/maintainability)
+
 # Crag DB
 A project of route database for sport climbers. I wanted to learn new things and discover the capabilities of the Neo4j and Axon.
 
 ## Prerequisites
+- `Java 21`
 - `Java 21`
 - `skaffold`
 - `minikube` or other local kubernetes

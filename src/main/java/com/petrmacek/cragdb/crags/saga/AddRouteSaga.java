@@ -1,5 +1,6 @@
 package com.petrmacek.cragdb.crags.saga;
 
+import com.petrmacek.cragdb.crags.UUIDProvider;
 import com.petrmacek.cragdb.crags.api.command.CreateRouteCommand;
 import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
 import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
@@ -25,6 +26,8 @@ public class AddRouteSaga {
 
     @Autowired
     private transient ReactorCommandGateway commandGateway;
+    @Autowired
+    private transient UUIDProvider uuidProvider;
 
     private String siteId;
     private String routeId;
@@ -41,7 +44,7 @@ public class AddRouteSaga {
     public void on(RouteAddedEvent event) {
         this.siteId = event.siteId().toString();
 
-        var routeId = UUID.randomUUID();
+        var routeId = uuidProvider.getRouteId();
         this.routeId = routeId.toString();
 
         SagaLifecycle.associateWith("routeId", this.routeId);
