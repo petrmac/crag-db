@@ -14,11 +14,9 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
+import org.axonframework.modelling.command.AggregateVersion;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +29,6 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 @Slf4j
 public class SiteAggregate {
 
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @AggregateIdentifier
     private UUID siteId;
@@ -40,6 +36,9 @@ public class SiteAggregate {
 
     @AggregateMember
     private List<UUID> routesIds;
+
+    @AggregateVersion
+    private Long version;
 
     public SiteAggregate() {
     }

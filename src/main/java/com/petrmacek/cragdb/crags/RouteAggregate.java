@@ -13,6 +13,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
+import org.axonframework.modelling.command.AggregateVersion;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.util.UUID;
@@ -30,6 +31,9 @@ public class RouteAggregate {
 
     @AggregateMember
     private UUID siteId;
+
+    @AggregateVersion
+    private Long version;
 
     public RouteAggregate() {
     }
