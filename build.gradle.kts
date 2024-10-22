@@ -49,6 +49,9 @@ dependencies {
     implementation("org.axonframework:axon-spring-boot-starter:${property("axonVersion")}")
 
     // https://mvnrepository.com/artifact/org.axonframework.extensions.mongo/axon-mongo
+    implementation("org.axonframework:axon-tracing-opentelemetry:${property("axonVersion")}")
+
+    // https://mvnrepository.com/artifact/org.axonframework.extensions.mongo/axon-mongo
     implementation("org.axonframework.extensions.mongo:axon-mongo:${property("axonVersion")}")
 
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
