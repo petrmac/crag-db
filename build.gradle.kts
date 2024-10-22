@@ -48,6 +48,16 @@ dependencies {
     // https://mvnrepository.com/artifact/org.axonframework/axon-spring-boot-starter
     implementation("org.axonframework:axon-spring-boot-starter:${property("axonVersion")}")
 
+    // https://mvnrepository.com/artifact/org.axonframework.extensions.mongo/axon-mongo
+    implementation("org.axonframework.extensions.mongo:axon-mongo:${property("axonVersion")}")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // https://mvnrepository.com/artifact/org.axonframework/axon-micrometer
+    implementation("org.axonframework:axon-micrometer:${property("axonVersion")}")
+
+
+
     implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:${property("axonVersion")}")
 
     // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
