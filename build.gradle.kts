@@ -42,6 +42,10 @@ dependencies {
     implementation("org.springframework:spring-aspects")
 
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("name.nkonev.multipart-spring-graphql:multipart-spring-graphql:1.+")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
 
     implementation("org.springframework.modulith:spring-modulith-starter-core")
 
@@ -52,9 +56,9 @@ dependencies {
     implementation("org.axonframework:axon-tracing-opentelemetry:${property("axonVersion")}")
 
     // https://mvnrepository.com/artifact/org.axonframework.extensions.mongo/axon-mongo
-    implementation("org.axonframework.extensions.mongo:axon-mongo:${property("axonVersion")}")
+    // implementation("org.axonframework.extensions.mongo:axon-mongo:${property("axonVersion")}")
 
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+//    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
     // https://mvnrepository.com/artifact/org.axonframework/axon-micrometer
     implementation("org.axonframework:axon-micrometer:${property("axonVersion")}")

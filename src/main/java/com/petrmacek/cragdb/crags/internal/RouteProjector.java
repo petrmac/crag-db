@@ -65,22 +65,23 @@ public class RouteProjector {
     @QueryHandler
     public Flux<RouteAggregate> handle(GetRoutesQuery query) {
         return routeRepository.findBySiteId(query.siteId())
-                .map(routeEntity -> RouteAggregate.builder()
-                        .id(routeEntity.getId())
-                        .name(routeEntity.getName())
-                        .version(routeEntity.getVersion())
-                        .build())
+                .map(RouteProjector::mapRouteEntityAggregate)
                 .doOnError(e -> log.error("Error while fetching routes", e));
     }
 
     @QueryHandler
     public Flux<RouteAggregate> handle(FindRouteByNameQuery query) {
         return routeRepository.findByName(query.name())
-                .map(routeEntity -> RouteAggregate.builder()
-                        .id(routeEntity.getId())
-                        .name(routeEntity.getName())
-                        .version(routeEntity.getVersion())
-                        .build())
+                .map(RouteProjector::mapRouteEntityAggregate)
                 .doOnError(e -> log.error("Error while fetching routes", e));
+    }
+
+    private static RouteAggregate mapRouteEntityAggregate(final RouteEntity routeEntity) {
+        return RouteAggregate.builder()
+                .id(routeEntity.getId())
+                .name(routeEntity.getName())
+                .version(routeEntity.getVersion())
+                .grade(Grade.forString(routeEntity.getFrenchGrade(), GradeSystem.French))
+                .build();
     }
 }

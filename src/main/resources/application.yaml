@@ -27,14 +27,14 @@ spring:
     authentication:
       username: ${NEO4J_USER:neo4j}
       password: ${NEO4J_PASSWORD:verysecret}
-  data:
-    mongodb:
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      password: ${MONGO_PASSWORD:verysecret}
-      username: ${MONGO_USER:mongoadmin}
-      database: ${MONGO_DB:crag-db}
-      authentication-database: admin
+#  data:
+#    mongodb:
+#      host: ${MONGO_HOST:localhost}
+#      port: ${MONGO_PORT:27017}
+#      password: ${MONGO_PASSWORD:verysecret}
+#      username: ${MONGO_USER:mongoadmin}
+#      database: ${MONGO_DB:crag-db}
+#      authentication-database: admin
   liquibase:
     enabled: true
     change-log: classpath:changeLog.yaml

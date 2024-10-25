@@ -15,13 +15,30 @@ import org.axonframework.micrometer.MessageTimerMonitor;
 import org.axonframework.micrometer.TagsUtil;
 import org.axonframework.monitoring.MultiMessageMonitor;
 import org.axonframework.queryhandling.QueryBus;
+import org.axonframework.tracing.LoggingSpanFactory;
+import org.axonframework.tracing.MultiSpanFactory;
+import org.axonframework.tracing.SpanFactory;
+import org.axonframework.tracing.opentelemetry.OpenTelemetrySpanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Configuration
 public class MetricsConfiguration {
+
+    @Bean
+    public SpanFactory spanFactory() {
+        return new MultiSpanFactory(
+                Arrays.asList(
+                        LoggingSpanFactory.INSTANCE,
+                        OpenTelemetrySpanFactory
+                                .builder()
+                                .build()
+                )
+        );
+    }
 
     @Bean
     public ConfigurerModule metricConfigurer(MeterRegistry meterRegistry) {
