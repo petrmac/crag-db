@@ -26,10 +26,10 @@ public class RouteEntity {
     @Version
     private Long version;
 
-    public void associateWithSite(SiteEntity site) {
-        this.site = site;
+    public void associateWithSite(SiteEntity site, String sector) {
+        this.site = new BelongsToSite(site, sector);
     }
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.OUTGOING)
-    private SiteEntity site;
+    @Relationship(type = "BELONGS_TO")
+    private BelongsToSite site;
 }

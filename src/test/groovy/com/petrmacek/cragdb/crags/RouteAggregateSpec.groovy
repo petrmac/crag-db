@@ -26,6 +26,7 @@ class RouteAggregateSpec extends Specification {
         def routeId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def siteId = UUID.fromString("b5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def routeName = "Route 1"
+        def sector = "Sector 1"
         def data = RouteData.builder()
                 .name(routeName)
                 .grade(French.F6a)
@@ -36,8 +37,8 @@ class RouteAggregateSpec extends Specification {
 
         expect:
         fixture.givenNoPriorActivity()
-                .when(new CreateRouteCommand(siteId, routeId, data))
-                .expectEvents(new RouteCreatedEvent(siteId, routeId, data))
+                .when(new CreateRouteCommand(siteId, routeId, sector, data))
+                .expectEvents(new RouteCreatedEvent(siteId, routeId, sector, data))
     }
 
 

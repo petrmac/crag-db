@@ -18,6 +18,7 @@ import org.axonframework.modelling.command.AggregateVersion;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -33,6 +34,7 @@ public class SiteAggregate {
     @AggregateIdentifier
     private UUID siteId;
     private String name;
+    private Set<String> sectors;
 
     @AggregateMember
     private List<UUID> routesIds;
@@ -51,7 +53,7 @@ public class SiteAggregate {
         Assert.notNull(cmd.siteId(), () -> "ID should not be null");
         Assert.notNull(cmd.name(), () -> "Name should not be null");
 
-        AggregateLifecycle.apply(new SiteCreatedEvent(cmd.siteId(), cmd.name()));
+        AggregateLifecycle.apply(new SiteCreatedEvent(cmd.siteId(), cmd.name(), cmd.sectors()));
     }
 
     @EventSourcingHandler
@@ -60,12 +62,13 @@ public class SiteAggregate {
 
         siteId = event.siteId();
         name = event.name();
+        sectors = event.sectors();
     }
 
     @CommandHandler
     public void handle(AddRouteCommand cmd) {
         log.info("Route addition initiated: site: '{}', route: '{}'", cmd.siteId(), cmd.routeData().getName());
 
-        apply(new RouteAddedEvent(cmd.siteId(), cmd.routeData()));
+        apply(new RouteAddedEvent(cmd.siteId(), cmd.sector(), cmd.routeData()));
     }
 }

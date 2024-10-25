@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -18,6 +19,7 @@ public class SiteEntity {
     @Id
     private final UUID id;
     private String name;
+    private Set<String> sectors;
     private long lastUpdateEpoch;
 
     @Version

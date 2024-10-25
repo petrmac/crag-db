@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -45,7 +46,7 @@ public class RouteProjector {
                                         var frenchGrade = event.data().getGrade().toSystem(GradeSystem.French).map(Grade::getValue);
                                         var route = RouteEntity.builder()
                                                 .id(event.routeId())
-                                                .site(siteEntity)
+                                                .site(new BelongsToSite(siteEntity, event.sector()))
                                                 .name(event.data().getName())
                                                 .version(sequenceNumber)
                                                 .lastUpdateEpoch(timestamp.toEpochMilli());

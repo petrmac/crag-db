@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class CreateSiteMutation {
         log.info("Received request to create new site: '{}'", createSiteInput.getName());
 
         UUID siteId = UUID.randomUUID();
-        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, createSiteInput.getName());
+        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, createSiteInput.getName(), Set.copyOf(createSiteInput.getSectors()));
         return commandGateway.send(createSiteCommand)
                 .then(Mono.from(queryGateway.query(new GetSiteQuery(siteId), SiteAggregate.class))
                         .map(dtoMapper::mapSite)

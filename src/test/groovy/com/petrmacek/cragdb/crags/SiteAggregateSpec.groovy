@@ -27,17 +27,19 @@ class SiteAggregateSpec extends Specification {
         given:
         def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def siteName = "Tendon Hlubina"
+        def sectors = Set.of("Sector 1", "Sector 2", "Sector 3")
 
         expect:
         fixture.givenNoPriorActivity()
-                .when(new CreateSiteCommand(siteId, siteName))
-                .expectEvents(new SiteCreatedEvent(siteId, siteName))
+                .when(new CreateSiteCommand(siteId, siteName, sectors))
+                .expectEvents(new SiteCreatedEvent(siteId, siteName, sectors))
     }
 
     def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
         given:
         def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def siteName = "Tendon Hlubina"
+        def sectors = Set.of("Sector 1", "Sector 2", "Sector 3")
         def routeData1 = RouteData.builder()
                 .name("Yoga master")
                 .grade(French.F6a)
@@ -45,15 +47,16 @@ class SiteAggregateSpec extends Specification {
                 .build()
 
         expect:
-        fixture.givenCommands(new CreateSiteCommand(siteId, siteName))
-                .when(new AddRouteCommand(siteId, routeData1))
-                .expectEvents(new RouteAddedEvent(siteId, routeData1))
+        fixture.givenCommands(new CreateSiteCommand(siteId, siteName, sectors))
+                .when(new AddRouteCommand(siteId, "Sector 1", routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, "Sector 1", routeData1))
     }
 
     def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
         given:
         def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
         def siteName = "Tendon Hlubina"
+        def sectors = Set.of("Sector 1", "Sector 2", "Sector 3")
         def routeData1 = RouteData.builder()
                 .name("Krkavčí matka")
                 .grade(French.F7a)
@@ -61,9 +64,9 @@ class SiteAggregateSpec extends Specification {
                 .build()
 
         expect:
-        fixture.givenCommands(new CreateSiteCommand(siteId, siteName))
-                .when(new AddRouteCommand(siteId, routeData1))
-                .expectEvents(new RouteAddedEvent(siteId, routeData1))
+        fixture.givenCommands(new CreateSiteCommand(siteId, siteName, sectors))
+                .when(new AddRouteCommand(siteId, "Sector 1", routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, "Sector 1", routeData1))
     }
 
 }

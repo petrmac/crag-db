@@ -37,7 +37,7 @@ public class AddRouteMutation {
             dataBuilder.gradeSystem(dtoMapper.mapGradeSystem(createRouteInput.getGrade().getSystem()));
             convertGrade(createRouteInput, dataBuilder);
         }
-        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), dataBuilder.build());
+        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), createRouteInput.getSector(),  dataBuilder.build());
 
         var mutationResult = commandGateway.send(addRouteCommand);
 

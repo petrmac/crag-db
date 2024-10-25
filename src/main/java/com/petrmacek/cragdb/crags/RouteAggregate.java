@@ -46,7 +46,7 @@ public class RouteAggregate {
         Assert.notNull(cmd.siteId(), () -> "ID should not be null");
         Assert.notNull(cmd.routeData(), () -> "Data should not be null");
 
-        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.siteId(), cmd.routeId(), cmd.routeData()));
+        AggregateLifecycle.apply(new RouteCreatedEvent(cmd.siteId(), cmd.routeId(), cmd.sector(), cmd.routeData()));
     }
 
     @EventSourcingHandler
