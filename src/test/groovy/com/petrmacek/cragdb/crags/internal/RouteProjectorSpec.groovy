@@ -2,6 +2,12 @@ package com.petrmacek.cragdb.crags.internal
 
 import com.petrmacek.cragdb.config.Neo4JConfig
 import com.petrmacek.cragdb.crags.RouteAggregate
+import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent
+import com.petrmacek.cragdb.crags.api.model.GradeSystem
+import com.petrmacek.cragdb.crags.api.model.RouteData
+import com.petrmacek.cragdb.crags.api.model.grade.Grade
+import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery
+import com.petrmacek.cragdb.crags.api.query.GetRouteQuery
 import com.petrmacek.cragdb.crags.api.query.GetRoutesQuery
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
@@ -22,6 +28,8 @@ import reactor.test.StepVerifier
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.Instant
+
 @Unroll
 @ActiveProfiles("test")
 @EnableAutoConfiguration
@@ -38,7 +46,6 @@ class RouteProjectorSpec extends Specification {
     private static final String ROUTE_ID_1 = "e51987b8-0c49-4e4d-97e3-5adc31f5169d"
     private static final String ROUTE_ID_2 = "e51987b8-0c49-4e4d-97e3-5adc31f5169c"
     private static final String HLUBINA_SITE_NAME = "Tendon Hlubina"
-
 
 
     private static Neo4j newServer
@@ -95,6 +102,52 @@ class RouteProjectorSpec extends Specification {
                     assert routeAggregate instanceof RouteAggregate
                     assert routeAggregate.id == UUID.fromString(ROUTE_ID_2)
                     assert routeAggregate.siteId == siteId
+                    true // Return true to indicate the match
+                }
+                .verifyComplete()
+    }
+
+    def "should find a route by name"() {
+        given:
+        def siteId = UUID.fromString(HLUBINA_SITE_ID)
+
+        when:
+        def foundResult = routeProjector.handle(new FindRouteByNameQuery("Route 1"))
+
+        then:
+        StepVerifier.create(foundResult)
+                .expectNextMatches { routeAggregate ->
+                    assert routeAggregate instanceof RouteAggregate
+                    assert routeAggregate.id == UUID.fromString(ROUTE_ID_1)
+                    assert routeAggregate.siteId == siteId
+                    assert routeAggregate.name == "Route 1"
+                    true // Return true to indicate the match
+                }
+                .verifyComplete()
+    }
+
+    @spock.lang.Ignore
+    def "should handle RouteCreatedEvent"() {
+        given:
+        UUID newRouteId = UUID.randomUUID()
+        UUID siteId = UUID.fromString(HLUBINA_SITE_ID)
+        def data = new RouteData("Pro slabe povahy", Grade.forString("6a", GradeSystem.French), GradeSystem.French)
+        RouteCreatedEvent event = new RouteCreatedEvent(siteId, newRouteId, "Sektor 1", data)
+
+        expect:
+        // Verify that the event handling is complete
+        StepVerifier.create(routeProjector.on(event, Instant.now(), 1))
+                .verifyComplete()
+
+        and:
+        def foundResult = routeProjector.handle(new GetRouteQuery(newRouteId))
+
+        StepVerifier.create(foundResult)
+                .expectNextMatches { routeAggregate ->
+                    assert routeAggregate instanceof RouteAggregate
+                    assert routeAggregate.id == newRouteId
+                    assert routeAggregate.name == "Pro slabe povahy"
+                    assert routeAggregate.grade == Grade.forString("6a", GradeSystem.French)
                     true // Return true to indicate the match
                 }
                 .verifyComplete()

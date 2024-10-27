@@ -1,13 +1,15 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/59f16110623a9b5801d2/maintainability)](https://codeclimate.com/github/petrmac/crag-db/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/59f16110623a9b5801d2/test_coverage)](https://codeclimate.com/github/petrmac/crag-db/test_coverage)
 
 # Crag DB
 A project of route database for sport climbers. I wanted to learn new things and discover the capabilities of the Neo4j and Axon.
 
 ## Prerequisites
 - `Java 21`
-- `Java 21`
 - `skaffold`
 - `minikube` or other local kubernetes
+
+For minikube please follow the instructions on the [official site](https://minikube.sigs.k8s.io/docs/start/).
 
 
 ## How to run
@@ -21,21 +23,21 @@ skaffold dev
 ```
 
 This will start the app with all dependencies in the kubernetes cluster.
+The application does not have any ingress or UI configured yet, the GraphQL API can be accessed via port-forwarding.
+
 
 ## Local build
 
-Start docker containers below and run app.
+Start docker containers via the compose file below and run app in your IDE.
 
-### Neo4j
+### Run docker-compose
+
+This will start in interactive mode and you can see the logs.
 ```shell
-docker run \
-    --restart always \
-    --publish=7474:7474 --publish=7687:7687 \
-    --env NEO4J_AUTH=neo4j/verysecret \
-    neo4j
+docker compose up 
 ```
 
-### Axon Server
+Alternatively, you can run it in the background.
 ```shell
-docker run --rm -p 8024:8024 -p 8124:8124 axoniq/axonserver:2024.1.2-jdk-17-nonroot
+docker compose up -d
 ```

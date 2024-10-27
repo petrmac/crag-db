@@ -5,6 +5,7 @@ import com.petrmacek.cragdb.crags.api.event.RouteCreatedEvent;
 import com.petrmacek.cragdb.crags.api.model.GradeSystem;
 import com.petrmacek.cragdb.crags.api.model.grade.Grade;
 import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery;
+import com.petrmacek.cragdb.crags.api.query.GetRouteQuery;
 import com.petrmacek.cragdb.crags.api.query.GetRoutesQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -28,10 +28,10 @@ public class RouteProjector {
     private final SiteRepository siteRepository;
 
     @EventHandler
-    public void on(RouteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
+    public Mono<Void> on(RouteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
         log.info("MATERIALIZATION: Creating route: '{}', name: '{}'", event.routeId(), event.data().getName());
 
-        routeRepository.existsById(event.routeId())
+        return routeRepository.existsById(event.routeId())
                 .flatMap(exists -> {
                             if (exists) {
                                 log.info("MATERIALIZATION: Route with id: '{}' already exists, skipping creation", event.routeId());
@@ -41,26 +41,31 @@ public class RouteProjector {
                                     .switchIfEmpty(Mono.error(new IllegalStateException("MATERIALIZATION: Site with id: '%s' not found".formatted(event.siteId()))))
                                     .doOnError(e -> log.error("MATERIALIZATION: Error while fetching site", e))
                                     .flatMap(siteEntity -> {
-                                        var ydsGrade = event.data().getGrade().toSystem(GradeSystem.YDS).map(Grade::getValue);
-                                        var uiaaGrade = event.data().getGrade().toSystem(GradeSystem.UIAA).map(Grade::getValue);
-                                        var frenchGrade = event.data().getGrade().toSystem(GradeSystem.French).map(Grade::getValue);
-                                        var route = RouteEntity.builder()
-                                                .id(event.routeId())
-                                                .site(new BelongsToSite(siteEntity, event.sector()))
-                                                .name(event.data().getName())
-                                                .version(sequenceNumber)
-                                                .lastUpdateEpoch(timestamp.toEpochMilli());
-                                        ydsGrade.ifPresent(route::ydsGrade);
-                                        uiaaGrade.ifPresent(route::uiaaGrade);
-                                        frenchGrade.ifPresent(route::frenchGrade);
-                                        return routeRepository.save(route.build());
+                                        var route = createRouteEntity(event, timestamp, sequenceNumber, siteEntity);
+                                        return routeRepository.save(route);
                                     });
                         }
                 ).doOnSuccess(v -> {
                     log.info("MATERIALIZATION: Route saved successfully: '{}'", event.routeId());
                 })
                 .doOnError(e -> log.error("MATERIALIZATION: Error while creating route", e))
-                .subscribe(); // Convert to Mono<Void> to signify completion
+                .then();
+    }
+
+    private static RouteEntity createRouteEntity(final RouteCreatedEvent event, final Instant timestamp, final long sequenceNumber, final SiteEntity siteEntity) {
+        var ydsGrade = event.data().getGrade().toSystem(GradeSystem.YDS).map(Grade::getValue);
+        var uiaaGrade = event.data().getGrade().toSystem(GradeSystem.UIAA).map(Grade::getValue);
+        var frenchGrade = event.data().getGrade().toSystem(GradeSystem.French).map(Grade::getValue);
+        var route = RouteEntity.builder()
+                .id(event.routeId())
+                .site(new BelongsToSite(siteEntity, event.sector()))
+                .name(event.data().getName())
+//                .version(sequenceNumber)
+                .lastUpdateEpoch(timestamp.toEpochMilli());
+        ydsGrade.ifPresent(route::ydsGrade);
+        uiaaGrade.ifPresent(route::uiaaGrade);
+        frenchGrade.ifPresent(route::frenchGrade);
+        return route.build();
     }
 
     @QueryHandler
@@ -68,6 +73,13 @@ public class RouteProjector {
         return routeRepository.findBySiteId(query.siteId())
                 .map(RouteProjector::mapRouteEntityAggregate)
                 .doOnError(e -> log.error("Error while fetching routes", e));
+    }
+
+    @QueryHandler
+    public Mono<RouteAggregate> handle(GetRouteQuery query) {
+        return routeRepository.findById(query.routeId())
+                .map(RouteProjector::mapRouteEntityAggregate)
+                .doOnError(e -> log.error("Error while fetching route", e));
     }
 
     @QueryHandler
