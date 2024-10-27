@@ -81,6 +81,7 @@ public class RouteProjector {
         return RouteAggregate.builder()
                 .id(routeEntity.getId())
                 .name(routeEntity.getName())
+                .siteId(routeEntity.getSite().getSite().getId())
                 .version(routeEntity.getVersion())
                 .grade(Grade.forString(routeEntity.getFrenchGrade(), GradeSystem.French))
                 .build();

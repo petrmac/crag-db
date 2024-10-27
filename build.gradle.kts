@@ -64,8 +64,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.axonframework/axon-micrometer
     implementation("org.axonframework:axon-micrometer:${property("axonVersion")}")
 
-
-
     implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:${property("axonVersion")}")
 
     // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
@@ -93,13 +91,16 @@ dependencies {
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-
     // https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness
     testImplementation("org.neo4j.test:neo4j-harness:5.24.1")
+
     testImplementation("org.testcontainers:spock")
     testImplementation("org.spockframework:spock-core")
     testImplementation("org.spockframework:spock-spring")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-neo4j")
+
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("com.squareup.okhttp3:mockwebserver")
     testImplementation("com.squareup.okhttp3:okhttp")

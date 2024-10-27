@@ -12,8 +12,8 @@ public interface RouteRepository extends ReactiveNeo4jRepository<RouteEntity, UU
     Flux<RouteEntity> findByName(String name);
 
     @Query("""
-            MATCH (site:Site {id: $siteId})<-[:BELONGS_TO]-(route:Route)
-            RETURN route
+            MATCH (site:Site {id: $siteId})<-[b:BELONGS_TO]-(route:Route)
+            RETURN route, site, b
             """)
     Flux<RouteEntity> findBySiteId(UUID siteId);
 

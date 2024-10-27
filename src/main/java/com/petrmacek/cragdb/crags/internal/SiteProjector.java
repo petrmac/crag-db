@@ -23,11 +23,11 @@ public class SiteProjector {
     private final SiteRepository siteRepository;
 
     @EventHandler
-    public void on(SiteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
+    public Mono<Void> on(SiteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
         log.info("MATERIALIZATION: Creating site: '{}', name: '{}'", event.siteId(), event.name());
 
         // Check if the site already exists
-        siteRepository.existsById(event.siteId())
+        return siteRepository.existsById(event.siteId())
                 .flatMap(exists -> {
                     if (exists) {
                         log.info("MATERIALIZATION: Site with id: '{}' already exists, skipping creation", event.siteId());
@@ -43,7 +43,7 @@ public class SiteProjector {
                     return siteRepository.save(site).then();
                 }).doOnSuccess(v -> {
                     log.info("MATERIALIZATION: Site saved successfully: '{}'", event.siteId());
-                }).subscribe(); // Convert to Mono<Void> to signify completion
+                });
     }
 
 
