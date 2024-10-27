@@ -1,6 +1,7 @@
 plugins {
     java
     groovy
+    jacoco
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.netflix.dgs.codegen") version "6.3.0"
@@ -156,3 +157,13 @@ liquibase {
     }
     runList = "main"
 }
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+}
+
