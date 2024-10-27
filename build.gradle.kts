@@ -167,3 +167,18 @@ tasks.jacocoTestReport {
     }
 }
 
+afterEvaluate {
+    tasks.jacocoTestReport {
+        classDirectories.setFrom(
+            fileTree("build/classes/java/main") {
+                exclude("**/excluded/package/**") // Adjust exclusions as needed
+            }
+        )
+        sourceDirectories.setFrom(files("src/main/java"))
+        executionData.setFrom(
+            fileTree(layout.buildDirectory.dir("jacoco")) {
+                include("**/test.exec")
+            }
+        )
+    }
+}
