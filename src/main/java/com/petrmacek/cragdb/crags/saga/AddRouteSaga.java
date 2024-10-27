@@ -43,12 +43,11 @@ public class AddRouteSaga {
     public void on(RouteAddedEvent event) {
         this.siteId = event.siteId().toString();
 
-        var routeId = uuidProvider.getRouteId();
-        this.routeId = routeId.toString();
+        this.routeId = event.routeId().toString();
 
         SagaLifecycle.associateWith("routeId", this.routeId);
 
-        commandGateway.send(new CreateRouteCommand(event.siteId(), routeId, event.sector(), event.routeData()))
+        commandGateway.send(new CreateRouteCommand(event.siteId(), event.routeId(), event.sector(), event.routeData()))
                 .doOnError(e -> {
                     log.error("SAGA: Error while adding route to site", e);
                     // Handle any errors that might occur when sending the command

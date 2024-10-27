@@ -38,6 +38,7 @@ class SiteAggregateSpec extends Specification {
     def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
         given:
         def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
+        def routeId = UUID.randomUUID()
         def siteName = "Tendon Hlubina"
         def sectors = Set.of("Sector 1", "Sector 2", "Sector 3")
         def routeData1 = RouteData.builder()
@@ -48,13 +49,14 @@ class SiteAggregateSpec extends Specification {
 
         expect:
         fixture.givenCommands(new CreateSiteCommand(siteId, siteName, sectors))
-                .when(new AddRouteCommand(siteId, "Sector 1", routeData1))
-                .expectEvents(new RouteAddedEvent(siteId, "Sector 1", routeData1))
+                .when(new AddRouteCommand(siteId, routeId, "Sector 1", routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, routeId, "Sector 1", routeData1))
     }
 
     def "should emit RouteAddedEvent when AddRouteCommand is sent"() {
         given:
         def siteId = UUID.fromString("f5838853-b6f0-4b2f-81aa-6dd8ac97d34d")
+        def routeId = UUID.randomUUID()
         def siteName = "Tendon Hlubina"
         def sectors = Set.of("Sector 1", "Sector 2", "Sector 3")
         def routeData1 = RouteData.builder()
@@ -65,8 +67,8 @@ class SiteAggregateSpec extends Specification {
 
         expect:
         fixture.givenCommands(new CreateSiteCommand(siteId, siteName, sectors))
-                .when(new AddRouteCommand(siteId, "Sector 1", routeData1))
-                .expectEvents(new RouteAddedEvent(siteId, "Sector 1", routeData1))
+                .when(new AddRouteCommand(siteId, routeId, "Sector 1", routeData1))
+                .expectEvents(new RouteAddedEvent(siteId, routeId, "Sector 1", routeData1))
     }
 
 }

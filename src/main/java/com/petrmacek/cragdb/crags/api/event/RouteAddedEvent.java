@@ -6,5 +6,5 @@ import org.axonframework.serialization.Revision;
 import java.util.UUID;
 
 @Revision("1.0")
-public record RouteAddedEvent(UUID siteId, String sector, RouteData routeData) {
+public record RouteAddedEvent(UUID siteId, UUID routeId, String sector, RouteData routeData) {
 }

@@ -9,15 +9,18 @@ import com.petrmacek.cragdb.crags.api.model.RouteData;
 import com.petrmacek.cragdb.crags.api.model.grade.French;
 import com.petrmacek.cragdb.crags.api.model.grade.UIAA;
 import com.petrmacek.cragdb.crags.api.model.grade.YDS;
-import com.petrmacek.cragdb.crags.api.query.FindRouteByNameQuery;
+import com.petrmacek.cragdb.crags.api.query.GetRouteQuery;
 import com.petrmacek.cragdb.generated.types.CreateRouteInput;
 import com.petrmacek.cragdb.generated.types.Route;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway;
 import org.axonframework.extensions.reactor.queryhandling.gateway.ReactorQueryGateway;
+import org.springframework.dao.OptimisticLockingFailureException;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
@@ -37,14 +40,21 @@ public class AddRouteMutation {
             dataBuilder.gradeSystem(dtoMapper.mapGradeSystem(createRouteInput.getGrade().getSystem()));
             convertGrade(createRouteInput, dataBuilder);
         }
-        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), createRouteInput.getSector(),  dataBuilder.build());
+        var routeId = UUID.randomUUID();
+        AddRouteCommand addRouteCommand = new AddRouteCommand(UUID.fromString(createRouteInput.getSiteId()), routeId, createRouteInput.getSector(), dataBuilder.build());
 
-        var mutationResult = commandGateway.send(addRouteCommand);
-
-        return mutationResult.flatMap(routeId -> queryGateway.streamingQuery(new FindRouteByNameQuery(createRouteInput.getName()), RouteAggregate.class)
-                        .single())
-                .map(dtoMapper::mapRoute)
-                .doOnError(e -> log.error("Error while fetching route", e));
+        return commandGateway.send(addRouteCommand)
+                .doOnSubscribe(sub -> log.info("Sending AddRouteCommand"))
+                .doOnSuccess(success -> log.info("Command sent successfully"))
+                .then(queryGateway.query(new GetRouteQuery(routeId), RouteAggregate.class)
+                        .doOnSubscribe(sub -> log.info("Querying for RouteAggregate"))
+                        .map(dtoMapper::mapRoute)
+                        .retryWhen(Retry.backoff(10, Duration.ofMillis(200)) // Retry up to 10 times with exponential backoff
+                                .filter(ex -> ex instanceof OptimisticLockingFailureException)
+                                .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> retrySignal.failure()))
+                        .doOnError(e -> log.error("Error while fetching route", e))
+                        .doOnSuccess(route -> log.info("Route fetched successfully: '{}'", routeId))
+                );
     }
 
     private static void convertGrade(final CreateRouteInput createRouteInput, final RouteData.RouteDataBuilder data) {

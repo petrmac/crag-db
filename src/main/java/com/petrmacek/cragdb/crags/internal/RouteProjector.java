@@ -28,10 +28,10 @@ public class RouteProjector {
     private final SiteRepository siteRepository;
 
     @EventHandler
-    public Mono<Void> on(RouteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
+    public void on(RouteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
         log.info("MATERIALIZATION: Creating route: '{}', name: '{}'", event.routeId(), event.data().getName());
 
-        return routeRepository.existsById(event.routeId())
+        routeRepository.existsById(event.routeId())
                 .flatMap(exists -> {
                             if (exists) {
                                 log.info("MATERIALIZATION: Route with id: '{}' already exists, skipping creation", event.routeId());
@@ -42,14 +42,16 @@ public class RouteProjector {
                                     .doOnError(e -> log.error("MATERIALIZATION: Error while fetching site", e))
                                     .flatMap(siteEntity -> {
                                         var route = createRouteEntity(event, timestamp, sequenceNumber, siteEntity);
-                                        return routeRepository.save(route);
+                                        return routeRepository.save(route)
+                                                .doOnSuccess(v -> log.info("MATERIALIZATION: Route with id: '{}' created", event.routeId()))
+                                                .doOnError(e -> log.error("MATERIALIZATION: Error while saving route", e))
+                                                .then();
                                     });
                         }
                 ).doOnSuccess(v -> {
-                    log.info("MATERIALIZATION: Route saved successfully: '{}'", event.routeId());
+                    log.info("MATERIALIZATION: RouteCreatedEvent handled successfully: '{}'", event.routeId());
                 })
-                .doOnError(e -> log.error("MATERIALIZATION: Error while creating route", e))
-                .then();
+                .subscribe();
     }
 
     private static RouteEntity createRouteEntity(final RouteCreatedEvent event, final Instant timestamp, final long sequenceNumber, final SiteEntity siteEntity) {

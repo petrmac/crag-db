@@ -1,0 +1,17 @@
+mutation {
+    addRoute(createRouteInput: {
+        siteId: "a7a3c3f7-d181-413a-8c71-ac04124a0e61",
+        name: "New Route 7",
+        grade: {
+            system: French,
+            value: "7a+"
+        },
+        sector: "Tibet"
+
+    }) {
+        id
+        name
+        grade
+        gradeSystem
+    }
+}

@@ -69,6 +69,6 @@ public class SiteAggregate {
     public void handle(AddRouteCommand cmd) {
         log.info("Route addition initiated: site: '{}', route: '{}'", cmd.siteId(), cmd.routeData().getName());
 
-        apply(new RouteAddedEvent(cmd.siteId(), cmd.sector(), cmd.routeData()));
+        apply(new RouteAddedEvent(cmd.siteId(), cmd.routeId(), cmd.sector(), cmd.routeData()));
     }
 }
