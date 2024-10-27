@@ -1,0 +1,11 @@
+schema:
+  - ../src/main/resources/schema/schema.graphql
+  - ../src/main/resources/schema/route.graphql
+  - ../src/main/resources/schema/site.graphql
+documents:
+  - '**/*.graphql'
+queries:
+  - './queries/*.graphql'
+extensions:
+  endpoints:
+    dev: http://localhost:3000/graphql

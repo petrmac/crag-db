@@ -35,13 +35,19 @@ public class CreateSiteMutation {
 
         UUID siteId = UUID.randomUUID();
         CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, createSiteInput.getName(), Set.copyOf(createSiteInput.getSectors()));
+
         return commandGateway.send(createSiteCommand)
-                .then(Mono.from(queryGateway.query(new GetSiteQuery(siteId), SiteAggregate.class))
+                .doOnSubscribe(sub -> log.info("Sending CreateSiteCommand"))
+                .doOnSuccess(success -> log.info("Command sent successfully"))
+                .then(queryGateway.query(new GetSiteQuery(siteId), SiteAggregate.class)
+                        .doOnSubscribe(sub -> log.info("Querying for SiteAggregate"))
                         .map(dtoMapper::mapSite)
                         .retryWhen(Retry.backoff(10, Duration.ofMillis(100)) // Retry up to 10 times with exponential backoff
                                 .filter(ex -> ex instanceof OptimisticLockingFailureException)
                                 .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> retrySignal.failure()))
-                        .doOnError(e -> log.error("Error while fetching site", e)));
+                        .doOnError(e -> log.error("Error while fetching site", e))
+                        .doOnSuccess(site -> log.info("Site fetched successfully: '{}'", site.getName()))
+                );
 
     }
 }

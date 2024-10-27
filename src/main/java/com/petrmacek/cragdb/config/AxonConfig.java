@@ -13,5 +13,4 @@ public class AxonConfig {
     public Cache cragDbCache() {
         return new WeakReferenceCache();
     }
-
 }

@@ -23,11 +23,11 @@ public class SiteProjector {
     private final SiteRepository siteRepository;
 
     @EventHandler
-    public Mono<Void> on(SiteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
+    public void on(SiteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
         log.info("MATERIALIZATION: Creating site: '{}', name: '{}'", event.siteId(), event.name());
 
         // Check if the site already exists
-        return siteRepository.existsById(event.siteId())
+        siteRepository.existsById(event.siteId())
                 .flatMap(exists -> {
                     if (exists) {
                         log.info("MATERIALIZATION: Site with id: '{}' already exists, skipping creation", event.siteId());
@@ -37,36 +37,41 @@ public class SiteProjector {
                     SiteEntity site = SiteEntity.builder()
                             .id(event.siteId())
                             .name(event.name())
+                            .sectors(event.sectors())
                             .version(sequenceNumber)
                             .lastUpdateEpoch(timestamp.toEpochMilli())
                             .build();
-                    return siteRepository.save(site).then();
+                    return siteRepository.save(site)
+                            .doOnSuccess(v -> log.info("MATERIALIZATION: Site with id: '{}' created", event.siteId()))
+                            .doOnError(e -> log.error("Error while saving site", e))
+                            .then();
                 }).doOnSuccess(v -> {
-                    log.info("MATERIALIZATION: Site saved successfully: '{}'", event.siteId());
-                });
+                    log.info("MATERIALIZATION: SiteCreatedEvent handled successfully: '{}'", event.siteId());
+                }).subscribe(); // Convert to Mono<Void> to signify completion
     }
 
 
     @QueryHandler
     public Mono<SiteAggregate> handle(GetSiteQuery query) {
         return siteRepository.findById(query.siteId())
-                .map(siteEntity -> SiteAggregate.builder()
-                        .siteId(siteEntity.getId())
-                        .name(siteEntity.getName())
-                        .version(siteEntity.getVersion())
-                        .build())
+                .map(SiteProjector::mapSiteAggregate)
                 .doOnError(e -> log.error("Error while fetching site", e));
     }
 
     @QueryHandler
     public Flux<SiteAggregate> handle(GetSitesQuery query) {
         return siteRepository.findAll()
-                .map(siteEntity -> SiteAggregate.builder()
-                        .siteId(siteEntity.getId())
-                        .name(siteEntity.getName())
-                        .version(siteEntity.getVersion())
-                        .build())
+                .map(SiteProjector::mapSiteAggregate)
                 .doOnError(e -> log.error("Error while fetching sites", e));
+    }
+
+    private static SiteAggregate mapSiteAggregate(final SiteEntity siteEntity) {
+        return SiteAggregate.builder()
+                .siteId(siteEntity.getId())
+                .name(siteEntity.getName())
+                .sectors(siteEntity.getSectors())
+                .version(siteEntity.getVersion())
+                .build();
     }
 
 

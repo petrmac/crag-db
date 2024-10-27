@@ -1,0 +1,13 @@
+{
+    sites {
+        id
+        name
+        routes {
+            id
+            name
+            grade
+            gradeSystem
+        }
+        sectors
+    }
+}

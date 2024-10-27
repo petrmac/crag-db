@@ -1,0 +1,16 @@
+mutation {
+    createSite(createSiteInput: {
+        name: "Hangar Ostrava" ,
+        sectors: ["Tibet", "Nose", "Beast"]
+    }) {
+        id
+        name
+        routes {
+            id
+            name
+            grade
+            gradeSystem
+        }
+        sectors
+    }
+}

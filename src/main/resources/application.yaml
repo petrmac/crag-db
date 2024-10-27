@@ -18,7 +18,6 @@ management:
     prometheus:
       enabled: true
 
-
 spring:
   application:
     name: crag-db
@@ -51,3 +50,14 @@ axon:
 #      crag-processor:
 #        mode: tracking
 #        source: crag-source
+logging:
+  level:
+    org:
+      axonframework:
+        tracing: WARN
+    springframework:
+      data:
+        neo4j:
+          repository:
+            query: ERROR
+

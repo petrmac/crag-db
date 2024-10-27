@@ -31,7 +31,8 @@ repositories {
 extra["netflixDgsVersion"] = "9.1.2"
 extra["springModulithVersion"] = "1.2.4"
 extra["spockBomVersion"] = "2.4-M4-groovy-4.0"
-extra["axonVersion"] = "4.10.0"
+extra["axonVersion"] = "4.10.1"
+extra["axonReactorVersion"] = "4.10.0"
 extra["googleProtobufVersion"] = "4.28.2"
 extra["mapstructVersion"] = "1.6.2"
 
@@ -64,7 +65,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.axonframework/axon-micrometer
     implementation("org.axonframework:axon-micrometer:${property("axonVersion")}")
 
-    implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:${property("axonVersion")}")
+    implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:${property("axonReactorVersion")}")
 
     // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")

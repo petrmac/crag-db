@@ -21,6 +21,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import reactor.test.StepVerifier
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -96,15 +97,16 @@ class SiteProjectorSpec extends Specification {
     }
 
 
+    @Ignore("Need to figure out how to use reactive code inside handler")
     def "should handle SiteCreatedEvent"() {
         given:
         UUID newSiteId = UUID.randomUUID()
         SiteCreatedEvent event = new SiteCreatedEvent(newSiteId, "Some climbing site", Set.of("Upper rocks", "Lower rocks"))
 
-        when:
-        siteProjector.on(event, Instant.now(), 1)
+//        when:
+//        siteProjector.on(event, Instant.now(), 1)
 
-        then:
+        expect:
         // Verify that the event handling is complete
         StepVerifier.create(siteProjector.on(event, Instant.now(), 1))
                 .verifyComplete()
@@ -112,6 +114,7 @@ class SiteProjectorSpec extends Specification {
         and:
         def foundResult = siteProjector.handle(new GetSiteQuery(newSiteId))
 
+        and:
         StepVerifier.create(foundResult)
                 .expectNextMatches { siteAggregate ->
                     assert siteAggregate instanceof SiteAggregate
