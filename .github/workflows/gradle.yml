@@ -13,6 +13,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  GITHUB_ACTOR: ${{github.actor}}
+  GITHUB_TOKEN: ${{github.token}}
+  GITHUB_SHA: ${{github.sha}}
+  CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+
 jobs:
 
   build:
@@ -22,8 +28,12 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 21
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0' # will fetch the entire history
+
+      - name: "Set up JDK 21"
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -38,13 +48,19 @@ jobs:
           multi-cache-enabled: false
           arguments: clean build jacocoTestReport --parallel
 
-      - name: Download Code Climate Test Reporter
+      - name: "Create Github Release"
+        id: create_release
+        run: |
+          ./gradlew githubRelease
+
+      - name: "Download Code Climate Test Reporter"
         run: |
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
 
       # Report test coverage to Code Climate
-      - name: Report coverage to Code Climate
+      - name: "Report coverage to Code Climate"
+        if: github.actor != 'dependabot[bot]'  # Exclude for Dependabot
         env:
           # Set CC_TEST_REPORTER_ID as secret of your repo
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}

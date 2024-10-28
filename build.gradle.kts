@@ -8,7 +8,7 @@ plugins {
     id("com.google.cloud.tools.jib") version "3.4.3"
     id("org.shipkit.shipkit-changelog") version "2.0.1"
     id("org.shipkit.shipkit-github-release") version "2.0.1"
-    id("org.shipkit.shipkit-auto-version") version "2.0.4"
+    id("org.shipkit.shipkit-auto-version") version "2.0.11"
 }
 
 group = "com.petrmacek"
@@ -185,7 +185,7 @@ tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::cl
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
     dependsOn("generateChangelog")
     repository = "shipkit/shipkit-changelog"
+    newTagRevision = project.extra["shipkit-auto-version.new-tag"]?.toString()
     changelog = tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class).get().outputFile
     githubToken = System.getenv("GITHUB_TOKEN") // using env var to avoid checked-in secrets
-    newTagRevision = System.getenv("GITHUB_SHA")   // using an env var automatically exported by Github Actions
 }
