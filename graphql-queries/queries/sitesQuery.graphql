@@ -9,5 +9,9 @@
             gradeSystem
         }
         sectors
+        location {
+            latitude
+            longitude
+        }
     }
 }

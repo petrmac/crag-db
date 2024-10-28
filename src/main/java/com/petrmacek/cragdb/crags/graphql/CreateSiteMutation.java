@@ -34,7 +34,8 @@ public class CreateSiteMutation {
         log.info("Received request to create new site: '{}'", createSiteInput.getName());
 
         UUID siteId = UUID.randomUUID();
-        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, createSiteInput.getName(), Set.copyOf(createSiteInput.getSectors()));
+        var data = dtoMapper.mapSiteData(createSiteInput);
+        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, data);
 
         return commandGateway.send(createSiteCommand)
                 .doOnSubscribe(sub -> log.info("Sending CreateSiteCommand"))

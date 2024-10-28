@@ -4,6 +4,7 @@ import com.petrmacek.cragdb.crags.api.command.AddRouteCommand;
 import com.petrmacek.cragdb.crags.api.command.CreateSiteCommand;
 import com.petrmacek.cragdb.crags.api.event.RouteAddedEvent;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
+import com.petrmacek.cragdb.crags.api.model.Location;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +36,7 @@ public class SiteAggregate {
     private UUID siteId;
     private String name;
     private Set<String> sectors;
+    private Location location;
 
     @AggregateMember
     private List<UUID> routesIds;
@@ -51,18 +53,19 @@ public class SiteAggregate {
         log.info("Creating SiteAggregate... '{}'", cmd);
 
         Assert.notNull(cmd.siteId(), () -> "ID should not be null");
-        Assert.notNull(cmd.name(), () -> "Name should not be null");
+        Assert.notNull(cmd.data().name(), () -> "Name should not be null");
 
-        AggregateLifecycle.apply(new SiteCreatedEvent(cmd.siteId(), cmd.name(), cmd.sectors()));
+        AggregateLifecycle.apply(new SiteCreatedEvent(cmd.siteId(), cmd.data()));
     }
 
     @EventSourcingHandler
     private void on(SiteCreatedEvent event) {
-        log.info("Site created: '{}', name: '{}'", event.siteId(), event.name());
+        log.info("Site created: '{}', name: '{}'", event.siteId(), event.data());
 
         siteId = event.siteId();
-        name = event.name();
-        sectors = event.sectors();
+        name = event.data().name();
+        sectors = event.data().sectors();
+        location = event.data().location();
     }
 
     @CommandHandler

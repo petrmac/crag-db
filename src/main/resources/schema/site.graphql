@@ -3,9 +3,21 @@ type Site {
     name: String!
     routes: [Route]
     sectors: [String!]
+    location: Location
+}
+
+type Location {
+    latitude: Float!
+    longitude: Float!
 }
 
 input CreateSiteInput {
     name: String!
     sectors: [String!]
+    location: LocationInput
+}
+
+input LocationInput {
+    latitude: Float!
+    longitude: Float!
 }

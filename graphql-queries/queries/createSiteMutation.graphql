@@ -1,7 +1,11 @@
 mutation {
     createSite(createSiteInput: {
         name: "Hangar Ostrava" ,
-        sectors: ["Tibet", "Nose", "Beast"]
+        sectors: ["Tibet", "Nose", "Beast"],
+        location: {
+            latitude: 49.8358758,
+            longitude: 18.2925403
+        }
     }) {
         id
         name
@@ -12,5 +16,9 @@ mutation {
             gradeSystem
         }
         sectors
+        location {
+            latitude
+            longitude
+        }
     }
 }

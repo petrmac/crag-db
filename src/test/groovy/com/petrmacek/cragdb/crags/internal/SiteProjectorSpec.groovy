@@ -3,6 +3,8 @@ package com.petrmacek.cragdb.crags.internal
 import com.petrmacek.cragdb.config.Neo4JConfig
 import com.petrmacek.cragdb.crags.SiteAggregate
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent
+import com.petrmacek.cragdb.crags.api.model.Location
+import com.petrmacek.cragdb.crags.api.model.SiteData
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery
 import com.petrmacek.cragdb.crags.api.query.GetSitesQuery
 import org.neo4j.harness.Neo4j
@@ -58,7 +60,7 @@ class SiteProjectorSpec extends Specification {
         newServer = Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer()
                 .withFixture("""
-                    CREATE (a:Site {id: '${HLUBINA_SITE_ID}', name: '${HLUBINA_SITE_NAME}', lastUpdateEpoch: 1635734400})
+                    CREATE (a:Site {id: '${HLUBINA_SITE_ID}', name: '${HLUBINA_SITE_NAME}', location: point({latitude: 49.8210403, longitude: 18.2774736}), lastUpdateEpoch: 1635734400})
                     CREATE (b:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169d', name: 'Route 1', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
                     CREATE (c:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169c', name: 'Route 2', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
                     MERGE (b)-[:BELONGS_TO {sector: 'Sektor 1'}]->(a)
@@ -91,6 +93,7 @@ class SiteProjectorSpec extends Specification {
                     assert siteAggregate instanceof SiteAggregate
                     assert siteAggregate.getSiteId() == siteId
                     assert siteAggregate.getName() == HLUBINA_SITE_NAME
+                    assert siteAggregate.location == new Location(49.8210403, 18.2774736)
                     true // Return true to indicate the match
                 }
                 .verifyComplete()
@@ -101,7 +104,8 @@ class SiteProjectorSpec extends Specification {
     def "should handle SiteCreatedEvent"() {
         given:
         UUID newSiteId = UUID.randomUUID()
-        SiteCreatedEvent event = new SiteCreatedEvent(newSiteId, "Some climbing site", Set.of("Upper rocks", "Lower rocks"))
+        def data = new SiteData("Some climbing site", Set.of("Upper rocks", "Lower rocks"), new Location(49.8210403, 18.2774736))
+        SiteCreatedEvent event = new SiteCreatedEvent(newSiteId, data)
 
 //        when:
 //        siteProjector.on(event, Instant.now(), 1)
