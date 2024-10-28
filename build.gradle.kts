@@ -187,7 +187,6 @@ tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class
     dependsOn("generateChangelog")
 
     newTagRevision = "main"
-    repository = "petrmac/crag-db"
     githubToken = System.getenv("PERSONAL_GITHUB_TOKEN")
     repository = "petrmac/crag-db"
     changelog = tasks.named("generateChangelog").get().outputs.files.singleFile
