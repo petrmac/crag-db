@@ -5,6 +5,7 @@ import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
 import com.petrmacek.cragdb.crags.SiteAggregate;
 import com.petrmacek.cragdb.crags.api.command.CreateSiteCommand;
+import com.petrmacek.cragdb.crags.api.model.SiteData;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
 import com.petrmacek.cragdb.generated.types.CreateSiteInput;
 import com.petrmacek.cragdb.generated.types.Site;
@@ -34,7 +35,8 @@ public class CreateSiteMutation {
         log.info("Received request to create new site: '{}'", createSiteInput.getName());
 
         UUID siteId = UUID.randomUUID();
-        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, createSiteInput.getName(), Set.copyOf(createSiteInput.getSectors()));
+        var data = new SiteData(createSiteInput.getName(), Set.copyOf(createSiteInput.getSectors()), null);
+        CreateSiteCommand createSiteCommand = new CreateSiteCommand(siteId, data);
 
         return commandGateway.send(createSiteCommand)
                 .doOnSubscribe(sub -> log.info("Sending CreateSiteCommand"))

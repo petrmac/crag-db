@@ -1,6 +1,7 @@
 package com.petrmacek.cragdb.crags.internal
 
 import com.petrmacek.cragdb.config.Neo4JConfig
+import com.petrmacek.cragdb.crags.SiteAggregate
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,7 +9,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.neo4j.AutoConfigureDataNeo4j
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
+import org.springframework.data.geo.Distance
+import org.springframework.data.geo.Metrics
+import org.springframework.data.geo.Point
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories
+import org.springframework.data.neo4j.types.GeographicPoint2d
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -16,6 +21,8 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.support.AnnotationConfigContextLoader
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import reactor.test.StepVerifier
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -44,7 +51,7 @@ class RepositoriesSpec extends Specification {
         newServer = Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer()
                 .withFixture("""
-                    CREATE (a:Site {id: 'f5838853-b6f0-4b2f-81aa-6dd8ac97d34d', name: 'Tendon Hlubina', lastUpdateEpoch: 1635734400})
+                    CREATE (a:Site {id: 'f5838853-b6f0-4b2f-81aa-6dd8ac97d34d', name: 'Tendon Hlubina', location: point({latitude: 49.8210403, longitude: 18.2774736}), lastUpdateEpoch: 1635734400})
                     CREATE (b:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169d', name: 'Route 1', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
                     CREATE (c:Route {id: 'e51987b8-0c49-4e4d-97e3-5adc31f5169c', name: 'Route 2', lastUpdateEpoch: 1635734400, frenchGrade: '6a', uiaaGrade: 'VI+', ydsGrade: '5.10b'})
                     MERGE (b)-[:BELONGS_TO {sector: 'Sektor 1'}]->(a)
@@ -101,6 +108,25 @@ class RepositoriesSpec extends Specification {
 
         then:
         site.name == "Tendon Hlubina"
+    }
+
+    @Ignore
+    def "should find site in vicinity (spatial)"() {
+        given:
+        def point = new Point(49.8358758, 18.2925403) as Point
+
+        when:
+        def site = siteRepository.findAllWithinDistance(point.x, point.y, 200000)
+
+        then:
+        StepVerifier.create(site)
+                .expectNextMatches { siteAggregate ->
+                    assert siteAggregate instanceof SiteAggregate
+//                    assert siteAggregate.getSiteId() == newSiteId
+//                    assert siteAggregate.getName() == "Some climbing site"
+                    true // Return true to indicate the match
+                }
+                .verifyComplete()
     }
 
     def "should find route by id"() {

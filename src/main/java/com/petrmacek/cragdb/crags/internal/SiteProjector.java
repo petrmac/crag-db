@@ -2,6 +2,7 @@ package com.petrmacek.cragdb.crags.internal;
 
 import com.petrmacek.cragdb.crags.SiteAggregate;
 import com.petrmacek.cragdb.crags.api.event.SiteCreatedEvent;
+import com.petrmacek.cragdb.crags.api.model.Location;
 import com.petrmacek.cragdb.crags.api.query.GetSiteQuery;
 import com.petrmacek.cragdb.crags.api.query.GetSitesQuery;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.SequenceNumber;
 import org.axonframework.eventhandling.Timestamp;
 import org.axonframework.queryhandling.QueryHandler;
+import org.springframework.data.neo4j.types.GeographicPoint2d;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +26,7 @@ public class SiteProjector {
 
     @EventHandler
     public void on(SiteCreatedEvent event, @Timestamp Instant timestamp, @SequenceNumber long sequenceNumber) {
-        log.info("MATERIALIZATION: Creating site: '{}', name: '{}'", event.siteId(), event.name());
+        log.info("MATERIALIZATION: Creating site: '{}', name: '{}'", event.siteId(), event.data());
 
         // Check if the site already exists
         siteRepository.existsById(event.siteId())
@@ -36,9 +38,10 @@ public class SiteProjector {
                     // If site doesn't exist, create and save it
                     SiteEntity site = SiteEntity.builder()
                             .id(event.siteId())
-                            .name(event.name())
-                            .sectors(event.sectors())
+                            .name(event.data().name())
+                            .sectors(event.data().sectors())
                             .version(sequenceNumber)
+                            .location(new GeographicPoint2d(event.data().location().latitude(), event.data().location().longitude()))
                             .lastUpdateEpoch(timestamp.toEpochMilli())
                             .build();
                     return siteRepository.save(site)
@@ -69,6 +72,7 @@ public class SiteProjector {
         return SiteAggregate.builder()
                 .siteId(siteEntity.getId())
                 .name(siteEntity.getName())
+                .location(new Location(siteEntity.getLocation().getLatitude(), siteEntity.getLocation().getLongitude()))
                 .sectors(siteEntity.getSectors())
                 .version(siteEntity.getVersion())
                 .build();

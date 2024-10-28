@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.types.GeographicPoint2d;
 
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class SiteEntity {
     private String name;
     private Set<String> sectors;
     private long lastUpdateEpoch;
+    private GeographicPoint2d location;
 
     @Version
     private Long version;
