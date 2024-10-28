@@ -6,11 +6,13 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
     id("com.netflix.dgs.codegen") version "6.3.0"
     id("com.google.cloud.tools.jib") version "3.4.3"
-    id("org.liquibase.gradle") version "2.1.0"
+    id("org.shipkit.shipkit-changelog") version "2.0.1"
+    id("org.shipkit.shipkit-github-release") version "2.0.1"
+    id("org.shipkit.shipkit-auto-version") version "2.0.4"
 }
 
 group = "com.petrmacek"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 
 java {
     toolchain {
@@ -149,17 +151,6 @@ jib {
     }
 }
 
-liquibase {
-    activities {
-        register("main") {
-            arguments = mapOf(
-                "changeLogFile" to "classpath:changeLog.yaml"
-            )
-        }
-    }
-    runList = "main"
-}
-
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
@@ -183,4 +174,18 @@ afterEvaluate {
             }
         )
     }
+}
+
+tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class) {
+    previousRevision = project.extra["shipkit-auto-version.previous-tag"]?.toString()
+    githubToken = System.getenv("GITHUB_TOKEN") // using env var to avoid checked-in secrets
+    repository = "petrmac/crag-db"
+}
+
+tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
+    dependsOn("generateChangelog")
+    repository = "shipkit/shipkit-changelog"
+    changelog = tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class).get().outputFile
+    githubToken = System.getenv("GITHUB_TOKEN") // using env var to avoid checked-in secrets
+    newTagRevision = System.getenv("GITHUB_SHA")   // using an env var automatically exported by Github Actions
 }
