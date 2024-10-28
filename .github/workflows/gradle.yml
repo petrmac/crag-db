@@ -50,7 +50,12 @@ jobs:
           arguments: clean build jacocoTestReport --parallel
 
       - name: "Create Github Release"
-        if: github.actor != 'dependabot[bot]'  # Exclude for Dependabot
+        # Release job, only for pushes to the main development branch
+        if: github.event_name == 'push'
+          && github.actor != 'dependabot[bot]'
+          && github.ref == 'refs/heads/main'
+          && github.repository == 'petrmac/crag-db'
+          && !contains(toJSON(github.event.commits.*.message), '[skip release]')
         id: create_release
         run: |
           ./gradlew githubRelease
