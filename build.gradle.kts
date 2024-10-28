@@ -189,7 +189,7 @@ tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::cl
 
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
     dependsOn("generateChangelog")
-    newTagRevision = newTag.toString()
+    newTagRevision = "main"
     repository = "petrmac/crag-db"
     releaseName = "Release $newTag"
     releaseTag = newTag.toString()
