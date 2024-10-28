@@ -12,7 +12,6 @@ plugins {
 }
 
 group = "com.petrmacek"
-version = "0.0.1"
 
 java {
     toolchain {
@@ -176,16 +175,21 @@ afterEvaluate {
     }
 }
 
+val newTag = project.findProperty("shipkit-auto-version.new-tag") ?: "v0.0.1"
+val previousTag = project.findProperty("shipkit-auto-version.previous-tag") ?: "v0.0.0"
+
+
 tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class) {
-    previousRevision = project.extra["shipkit-auto-version.previous-tag"]?.toString()
-    githubToken = System.getenv("GITHUB_TOKEN") // using env var to avoid checked-in secrets
+    // Load version properties from shipkit-auto-version
+    previousRevision = previousTag.toString()
+    githubToken = System.getenv("GITHUB_TOKEN")
     repository = "petrmac/crag-db"
 }
 
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
     dependsOn("generateChangelog")
-    repository = "shipkit/shipkit-changelog"
-    newTagRevision = project.extra["shipkit-auto-version.new-tag"]?.toString()
-    changelog = tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class).get().outputFile
-    githubToken = System.getenv("GITHUB_TOKEN") // using env var to avoid checked-in secrets
+    newTagRevision = newTag.toString()
+    githubToken = System.getenv("GITHUB_TOKEN")
+    repository = "petrmac/crag-db"
+    changelog = tasks.named("generateChangelog").get().outputs.files.singleFile
 }
