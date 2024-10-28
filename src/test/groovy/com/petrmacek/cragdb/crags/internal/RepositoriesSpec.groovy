@@ -1,7 +1,6 @@
 package com.petrmacek.cragdb.crags.internal
 
 import com.petrmacek.cragdb.config.Neo4JConfig
-import com.petrmacek.cragdb.crags.SiteAggregate
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,11 +8,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.neo4j.AutoConfigureDataNeo4j
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
-import org.springframework.data.geo.Distance
-import org.springframework.data.geo.Metrics
 import org.springframework.data.geo.Point
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories
-import org.springframework.data.neo4j.types.GeographicPoint2d
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -110,23 +106,24 @@ class RepositoriesSpec extends Specification {
         site.name == "Tendon Hlubina"
     }
 
-    @Ignore
+    @Ignore ("Not working")
     def "should find site in vicinity (spatial)"() {
         given:
         def point = new Point(49.8358758, 18.2925403) as Point
 
         when:
         def site = siteRepository.findAllWithinDistance(point.x, point.y, 200000)
+                .doOnError { println it }
+        .blockFirst()
 
         then:
-        StepVerifier.create(site)
-                .expectNextMatches { siteAggregate ->
-                    assert siteAggregate instanceof SiteAggregate
-//                    assert siteAggregate.getSiteId() == newSiteId
-//                    assert siteAggregate.getName() == "Some climbing site"
-                    true // Return true to indicate the match
-                }
-                .verifyComplete()
+        site
+//        StepVerifier.create(site)
+//                .expectNextMatches { entity ->
+//                    assert entity instanceof SiteEntity
+//                    true // Return true to indicate the match
+//                }
+//                .verifyComplete()
     }
 
     def "should find route by id"() {

@@ -1,8 +1,6 @@
 package com.petrmacek.cragdb.crags.internal;
 
 
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.Point;
 import org.springframework.data.neo4j.repository.ReactiveNeo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
