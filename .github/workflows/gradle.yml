@@ -41,7 +41,7 @@ jobs:
           distribution: 'temurin'
 
       - name: "Build with Gradle - cached"
-        uses: burrunan/gradle-cache-action@v1
+        uses: burrunan/gradle-cache-action@v2
         with:
           concurrent: true
           gradle-build-scan-report: false
