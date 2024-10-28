@@ -75,7 +75,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus:1.13.5")
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-    implementation("com.google.protobuf:protobuf-java:4.28.3")
+    implementation("com.google.protobuf:protobuf-java:3.23.4")
 
     implementation("org.liquibase:liquibase-core")
 
@@ -175,9 +175,8 @@ afterEvaluate {
     }
 }
 
-val newTag = project.findProperty("shipkit-auto-version.new-tag") ?: "v0.0.1"
-val previousTag = project.findProperty("shipkit-auto-version.previous-tag") ?: "v0.0.0"
-
+val previousTag = project.findProperty("shipkit-auto-version.previous-tag") ?: "v1.0.0"
+val newTag = project.findProperty("shipkit-auto-version.new-tag") ?: "v1.0.1"
 
 tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class) {
     // Load version properties from shipkit-auto-version
