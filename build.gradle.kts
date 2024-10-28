@@ -184,6 +184,7 @@ tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::cl
     previousRevision = previousTag.toString()
     githubToken = System.getenv("PERSONAL_GITHUB_TOKEN")
     repository = "petrmac/crag-db"
+
 }
 
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
