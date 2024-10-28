@@ -175,12 +175,9 @@ afterEvaluate {
     }
 }
 
-val previousTag = project.findProperty("shipkit-auto-version.previous-tag") ?: "v1.0.0"
-val newTag = project.findProperty("shipkit-auto-version.new-tag") ?: "v1.0.1"
-
 tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class) {
     // Load version properties from shipkit-auto-version
-    previousRevision = previousTag.toString()
+    previousRevision = project.findProperty("shipkit-auto-version.previous-tag").toString()
     githubToken = System.getenv("PERSONAL_GITHUB_TOKEN")
     repository = "petrmac/crag-db"
 
@@ -188,6 +185,8 @@ tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::cl
 
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
     dependsOn("generateChangelog")
+
+    val newTag = project.findProperty("shipkit-auto-version.new-tag")
     newTagRevision = "main"
     repository = "petrmac/crag-db"
     releaseName = "Release $newTag"
