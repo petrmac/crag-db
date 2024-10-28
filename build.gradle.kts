@@ -94,7 +94,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness
-    testImplementation("org.neo4j.test:neo4j-harness:5.24.1")
+    testImplementation("org.neo4j.test:neo4j-harness:5.24.2")
 
     testImplementation("org.testcontainers:spock")
     testImplementation("org.spockframework:spock-core")
