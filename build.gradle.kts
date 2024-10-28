@@ -182,14 +182,14 @@ val previousTag = project.findProperty("shipkit-auto-version.previous-tag") ?: "
 tasks.named("generateChangelog", org.shipkit.changelog.GenerateChangelogTask::class) {
     // Load version properties from shipkit-auto-version
     previousRevision = previousTag.toString()
-    githubToken = System.getenv("GITHUB_TOKEN")
+    githubToken = System.getenv("PERSONAL_GITHUB_TOKEN")
     repository = "petrmac/crag-db"
 }
 
 tasks.named("githubRelease", org.shipkit.github.release.GithubReleaseTask::class) {
     dependsOn("generateChangelog")
     newTagRevision = newTag.toString()
-    githubToken = System.getenv("GITHUB_TOKEN")
+    githubToken = System.getenv("PERSONAL_GITHUB_TOKEN")
     repository = "petrmac/crag-db"
     changelog = tasks.named("generateChangelog").get().outputs.files.singleFile
 }
