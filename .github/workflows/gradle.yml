@@ -50,11 +50,13 @@ jobs:
           arguments: clean build jacocoTestReport --parallel
 
       - name: "Create Github Release"
+        if: github.actor != 'dependabot[bot]'  # Exclude for Dependabot
         id: create_release
         run: |
           ./gradlew githubRelease
 
       - name: "Download Code Climate Test Reporter"
+        if: github.actor != 'dependabot[bot]'  # Exclude for Dependabot
         run: |
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
