@@ -75,7 +75,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus:1.13.5")
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-    implementation("com.google.protobuf:protobuf-java:3.23.4")
+    implementation("com.google.protobuf:protobuf-java:4.28.3")
 
     implementation("org.liquibase:liquibase-core")
 
