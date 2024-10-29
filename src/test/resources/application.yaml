@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:3000}
+  max-http-request-header-size: 5MB
+
+
+spring:
+  application:
+    name: crag-db
+  neo4j:
+    uri: ${NEO4J_URL:bolt://localhost:7687}
+    authentication:
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD:verysecret}
+
+axon:
+  axonserver:
+    servers: ${AXON_SERVERS:localhost}
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
+
+#  eventhandling:
+#    processors:
+#      crag-processor:
+#        mode: tracking
+#        source: crag-source
+logging:
+  level:
+    org:
+      axonframework:
+        tracing: WARN
+    springframework:
+      data:
+        neo4j:
+          repository:
+            query: ERROR
+
