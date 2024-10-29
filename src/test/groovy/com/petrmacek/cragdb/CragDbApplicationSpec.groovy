@@ -23,4 +23,9 @@ class CragDbApplicationSpec extends Specification {
         expect:
         true
     }
+
+    def "main app starts"() {
+        expect:
+        CragDbApplication.main([] as String)
+    }
 }

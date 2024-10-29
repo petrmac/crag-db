@@ -44,6 +44,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework:spring-aspects")
 
+
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -96,6 +97,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness
     testImplementation("org.neo4j.test:neo4j-harness:5.24.1")
 
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.testcontainers:spock")
     testImplementation("org.spockframework:spock-core")
     testImplementation("org.spockframework:spock-spring")
