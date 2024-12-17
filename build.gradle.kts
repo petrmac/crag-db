@@ -3,7 +3,7 @@ plugins {
     groovy
     jacoco
     id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("io.spring.dependency-management") version "1.1.7"
     id("com.netflix.dgs.codegen") version "7.0.3"
     id("com.google.cloud.tools.jib") version "3.4.4"
     id("org.shipkit.shipkit-changelog") version "2.0.1"
