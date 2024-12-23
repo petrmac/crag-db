@@ -110,7 +110,7 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp")
     testImplementation("org.axonframework:axon-test:${property("axonVersion")}")
 
-    testImplementation("ch.qos.logback:logback-classic:1.5.12")
+    testImplementation("ch.qos.logback:logback-classic:1.5.15")
     testImplementation("org.slf4j:slf4j-api:2.0.16")
     testImplementation("io.projectreactor:reactor-test")
 
