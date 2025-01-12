@@ -95,7 +95,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness
-    testImplementation("org.neo4j.test:neo4j-harness:5.26.0")
+    testImplementation("org.neo4j.test:neo4j-harness:5.26.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.testcontainers:spock")
