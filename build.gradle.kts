@@ -73,7 +73,7 @@ dependencies {
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
 
     // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
-    implementation("io.micrometer:micrometer-registry-prometheus:1.14.3")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.14.4")
 
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     implementation("com.google.protobuf:protobuf-java:3.23.4")
